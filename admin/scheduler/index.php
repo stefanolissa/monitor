@@ -1,5 +1,16 @@
 <?php
+global $wpdb;
+
 defined('ABSPATH') || exit;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    check_admin_referer('monitor-reset');
+    // TODO
+}
+
+// Yes, I know, it's not the right place. I know.
+wp_enqueue_script('monitor-plotly', 'https://cdn.plot.ly/plotly-3.1.0.min.js');
+
 class Monitor_List_Table extends WP_List_Table {
 
     /**
@@ -22,7 +33,8 @@ class Monitor_List_Table extends WP_List_Table {
     public function get_columns() {
         $columns = [
             'created' => 'Created',
-
+            'type' => 'Type',
+            'text' => 'Text'
         ];
         return $columns;
     }
@@ -41,9 +53,9 @@ class Monitor_List_Table extends WP_List_Table {
         $this->_column_headers = [$columns, $hidden, $sortable];
 
         // This is where you would implement pagination logic.
-        $per_page = 2; // Number of items to display per page.
+        $per_page = 50; // Number of items to display per page.
         $current_page = $this->get_pagenum();
-        $total_items = (int)$wpdb->get_var("select count(*) from {$wpdb->prefix}monitor_scheduler");
+        $total_items = (int) $wpdb->get_var("select count(*) from {$wpdb->prefix}monitor_scheduler");
 
         $this->set_pagination_args([
             'total_items' => $total_items,
@@ -52,7 +64,7 @@ class Monitor_List_Table extends WP_List_Table {
 
         // Slice the data for the current page.
         $this->items = $wpdb->get_results($wpdb->prepare("select * from {$wpdb->prefix}monitor_scheduler order by id desc limit %d offset %d",
-                $per_page, ($current_page-1)*$per_page));
+                        $per_page, ($current_page - 1) * $per_page));
     }
 
     /**
@@ -67,6 +79,10 @@ class Monitor_List_Table extends WP_List_Table {
         switch ($column_name) {
             case 'created':
                 return esc_html($item->created);
+            case 'text':
+                return esc_html($item->text);
+            case 'type':
+                return esc_html($item->type);
             default:
                 return '?';
         }
@@ -75,9 +91,41 @@ class Monitor_List_Table extends WP_List_Table {
 
 $table = new Monitor_List_Table();
 $table->prepare_items();
+
+// TODO: compute statistics
+$starts = $wpdb->get_results($wpdb->prepare("select *, UNIX_TIMESTAMP(created) as ts from {$wpdb->prefix}monitor_scheduler where type='start' order by id asc"));
+$deltas = [];
+$ts = $starts[0]->ts;
+for ($i = 1; $i < count($starts); $i++) {
+    $deltas[] = $starts[$i]->ts - $ts;
+    $ts = $starts[$i]->ts;
+}
+$avg = array_sum($deltas) / count($deltas);
 ?>
 <div class="wrap">
     <h2>Scheduler activations</h2>
+    <form method="post">
+        <?php wp_nonce_field('monitor-reset'); ?>
+        <button name="reset">Reset</button>
+    </form>
+
 
     <?php $table->display(); ?>
+
+    <div id="graph"></div>
 </div>
+
+<script>
+    jQuery(function () {
+        //TESTER = document.getElementById('graph');
+        var layout = {
+            title: {text: 'Interval between scheduler activations (seconds)'}
+        };
+        var data = [{
+                //x: [1, 2, 3, 4, 5],
+                y: <?php echo json_encode($deltas); ?>
+            }];
+
+        Plotly.newPlot('graph', data, layout);
+    });
+</script>

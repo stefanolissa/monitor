@@ -99,7 +99,7 @@ $table->prepare_items();
 <div class="wrap">
     <h2>Abilities</h2>
     <p>
-        <a href="?page=monitor-abilities&subpage=logs">Logs</a>
+        <a href="?page=monitor-abilities">List</a> | <a href="?page=monitor-abilities&subpage=logs">Logs</a>
     </p>
 
     <?php $table->display(); ?>
