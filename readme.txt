@@ -1,7 +1,7 @@
 === Monitor ===
 Tags: monitor, emails, abilities
 Tested up to: 6.8.2
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 Contributors: satollo
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -30,4 +30,5 @@ None, at moment.
 
 == Changelog ==
 
-None, at moment.
+= 1.0.1 =
+* Added dummy ability

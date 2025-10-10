@@ -17,6 +17,7 @@ class Monitor_List_Table extends WP_List_Table {
             'name' => 'Name',
             'context' => 'Context',
             'method' => 'Method',
+            'data' => 'Data'
         ];
         return $columns;
     }
@@ -53,6 +54,11 @@ class Monitor_List_Table extends WP_List_Table {
                 return esc_html($item->context);
             case 'method':
                 return esc_html($item->method);
+                case 'data':
+                    $url = admin_url('admin-ajax.php') . '?action=monitor-ability-data&id=' . rawurlencode($item->id);
+                    $url = wp_nonce_url($url, 'monitor-ability-data');
+                    $url .= '&TB_iframe=true'; // Add as last since Thickbox truncate the URL here
+                return '<a class="thickbox" href="' . esc_attr($url) . '">Data</a>';
             default:
                 return '?';
         }
@@ -61,6 +67,7 @@ class Monitor_List_Table extends WP_List_Table {
 
 $table = new Monitor_List_Table();
 $table->prepare_items();
+add_thickbox();
 ?>
 <div class="wrap">
     <h2>Ability calls</h2>

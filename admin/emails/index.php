@@ -1,5 +1,6 @@
 <?php
 defined('ABSPATH') || exit;
+
 class Emails_List_Table extends WP_List_Table {
 
     /**
@@ -44,7 +45,7 @@ class Emails_List_Table extends WP_List_Table {
         // This is where you would implement pagination logic.
         $per_page = 2; // Number of items to display per page.
         $current_page = $this->get_pagenum();
-        $total_items = (int)$wpdb->get_var("select count(*) from {$wpdb->prefix}monitor_emails");
+        $total_items = (int) $wpdb->get_var("select count(*) from {$wpdb->prefix}monitor_emails");
 
         $this->set_pagination_args([
             'total_items' => $total_items,
@@ -53,7 +54,7 @@ class Emails_List_Table extends WP_List_Table {
 
         // Slice the data for the current page.
         $this->items = $wpdb->get_results($wpdb->prepare("select * from {$wpdb->prefix}monitor_emails order by id desc limit %d offset %d",
-                $per_page, ($current_page-1)*$per_page));
+                        $per_page, ($current_page - 1) * $per_page));
     }
 
     /**
@@ -83,6 +84,9 @@ $table->prepare_items();
 ?>
 <div class="wrap">
     <h2>Emails</h2>
+    <p>
+        Consider the plugin WP Mail Logging if you need a serious logging of sent emails.
+    </p>
 
     <?php $table->display(); ?>
 </div>
