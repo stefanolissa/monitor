@@ -50,12 +50,55 @@ add_action('wp_ajax_monitor-ability-data', function () {
     die();
 });
 
+add_action('wp_ajax_monitor-emails-filters', function () {
+    global $wpdb;
+    check_ajax_referer('monitor-emails-filters');
+    $id = (int) $_GET['id'];
+    $log = $wpdb->get_row($wpdb->prepare("select * from {$wpdb->prefix}monitor_emails where id=%d limit 1", $id));
+    if (!$log) {
+        wp_send_json_error();
+    } else {
+        echo '<pre style="white-space: normal;">';
+        $filters = unserialize($log->filters);
+        foreach ($filters as $tag => $functions) {
+            echo '<strong>', esc_html($tag), '</strong><br>';
+            foreach ($functions ?? [] as $function) {
+                echo esc_html($function), '<br>';
+            }
+            echo '<br>';
+        }
+    }
+    die();
+});
+
+add_action('wp_ajax_monitor-scheduler-filters', function () {
+    global $wpdb;
+    check_ajax_referer('monitor-scheduler-filters');
+    $id = (int) $_GET['id'];
+    $log = $wpdb->get_row($wpdb->prepare("select * from {$wpdb->prefix}monitor_scheduler where id=%d limit 1", $id));
+    if (!$log) {
+        wp_send_json_error();
+    } else {
+        echo '<pre style="white-space: normal;">';
+        $filters = unserialize($log->filters);
+        foreach ($filters as $tag => $functions) {
+            echo '<strong>', esc_html($tag), '</strong><br>';
+            foreach ($functions ?? [] as $function) {
+                echo esc_html($function), '<br>';
+            }
+            echo '<br>';
+        }
+    }
+    die();
+});
+
+
 add_action('abilities_api_init', function () {
 
     $r = wp_register_ability('monitor/overview',
             [
                 'label' => 'Return an overview of the site activities',
-                'description' => 'Return an overview of the site activities',
+                'description' => 'Return an overview of the site activities: emails sent, activities invoked, scheduler statistics',
                 'input_schema' => [
                     'type' => 'object',
                     'properties' => [],
@@ -74,6 +117,11 @@ add_action('abilities_api_init', function () {
                             'description' => 'Details of the scheduler',
                             'minLength' => 0
                         ],
+                        'scheduler_notes' => [
+                            'type' => 'string',
+                            'description' => 'Notes about the scheduler statitics if needed.',
+                            'minLength' => 0
+                        ],
                         'abilities_statistics' => [
                             'type' => 'string',
                             'description' => 'Details of the abilities',
@@ -82,12 +130,44 @@ add_action('abilities_api_init', function () {
                     ],
                 ],
                 'execute_callback' => function () {
-                    return
-                    [
-                        'sent_emails' => '35',
-                        'scheduler_statistics' => 'Interval between runs: 340 seconds',
-                        'abilities_statistics' => 'Abilities invoked 450 times'
+                    global $wpdb;
+
+                    // TODO: Move the stats computation to a class
+                    $starts = $wpdb->get_results("select *, UNIX_TIMESTAMP(created) as ts from {$wpdb->prefix}monitor_scheduler WHERE type='start' AND created > DATE_SUB(NOW(), INTERVAL 30 DAY) order by id asc");
+                    $deltas = [];
+                    $ts = $starts[0]->ts;
+                    for ($i = 1; $i < count($starts); $i++) {
+                        $deltas[] = $starts[$i]->ts - $ts;
+                        $ts = $starts[$i]->ts;
+                    }
+                    $avg = array_sum($deltas) / count($deltas);
+                    $max = max($deltas);
+                    $min = min($deltas);
+
+                    $schedules = wp_get_schedules();
+                    $ok = true;
+                    $min_interval = DAY_IN_SECONDS;
+                    if (!empty($schedules)) {
+                        foreach ($schedules as $key => $data) {
+                            $min_interval = min($min_interval, $data['interval']);
+                            if ($ok && $avg > $data['interval'] * 1.3) {
+                                $ok = false;
+                            }
+                        }
+                    }
+
+
+                    $sent_emails = (int) $wpdb->get_var("select count(*) from {$wpdb->prefix}monitor_emails WHERE created > DATE_SUB(NOW(), INTERVAL 30 DAY)");
+
+                    $result = [
+                                'sent_emails' => $sent_emails,
+                                'scheduler_statistics' => "Average call interval {$avg} seconds, maximum interval {$max} seconds, minimum interval {$min} seconds. The required average interval is {$min_interval}",
+                                'abilities_statistics' => 'Abilities invoked 450 times'
                     ];
+
+                    $result['scheduler_notes'] = $ok ? 'Everything fine' : "The scheduler is not triggered enough often, the minumum interval should be {$min_interval}";
+
+                    return $result;
                 },
                 'permission_callback' => function () {
                     return current_user_can('administrator');

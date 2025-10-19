@@ -37,6 +37,7 @@ $sql = "CREATE TABLE `" . $wpdb->prefix . "monitor_emails` (
             `to` varchar(200) NOT NULL DEFAULT '',
             `subject` varchar(200) NOT NULL DEFAULT '',
             `context` varchar(50) NOT NULL DEFAULT '',
+            `filters` longtext,
             PRIMARY KEY (`id`)
             ) $charset_collate;";
 
@@ -52,6 +53,7 @@ $sql = "CREATE TABLE `" . $wpdb->prefix . "monitor_scheduler` (
             `ip` varchar(200) NOT NULL DEFAULT '',
             `context` varchar(50) NOT NULL DEFAULT '',
             `text` varchar(250) NOT NULL DEFAULT '',
+            `filters` longtext,
             PRIMARY KEY (`id`)
             ) $charset_collate;";
 
