@@ -53,6 +53,14 @@ wp_enqueue_script('dashboard');
             </tr>
             <tr>
                 <th>
+                    Monitor HTTP
+                </th>
+                <td>
+                    <input type="checkbox" value="1" name="data[http]" <?php echo isset($data['http']) ? 'checked' : ''; ?>>
+                </td>
+            </tr>
+            <tr>
+                <th>
                     Keep logs for
                 </th>
                 <td>

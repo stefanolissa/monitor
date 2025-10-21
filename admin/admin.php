@@ -53,6 +53,13 @@ add_action('admin_menu', function () {
                 include __DIR__ . '/scheduler/index.php';
             }
     );
+
+    add_submenu_page(
+            'monitor', 'HTTP', 'HTTP', 'administrator', 'monitor-http',
+            function () {
+                include __DIR__ . '/http/index.php';
+            }
+    );
 });
 
 add_action('wp_ajax_monitor-ability-data', function () {

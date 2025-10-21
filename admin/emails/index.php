@@ -53,6 +53,9 @@ $avg_duration = $wpdb->get_var("select avg(duration) from {$wpdb->prefix}monitor
 // Yes, I know, it's not the right place. I know.
 wp_enqueue_script('monitor-plotly', 'https://cdn.plot.ly/plotly-3.1.0.min.js');
 ?>
+<style>
+    <?php include __DIR__ . '/../style.css'; ?>
+</style>
 <div class="wrap">
     <h2>Emails</h2>
     <?php include __DIR__ . '/nav.php'; ?>
@@ -73,7 +76,7 @@ wp_enqueue_script('monitor-plotly', 'https://cdn.plot.ly/plotly-3.1.0.min.js');
 
                         <div class="inside">
 
-                            <table class="widefat" style="width: auto">
+                            <table class="widefat">
                                 <thead>
                                     <tr>
                                         <th>Parameter</th>
@@ -111,7 +114,7 @@ wp_enqueue_script('monitor-plotly', 'https://cdn.plot.ly/plotly-3.1.0.min.js');
 
                         <div class="inside">
 
-                            <table class="widefat" style="width: auto">
+                            <table class="widefat">
                                 <thead>
                                     <tr>
                                         <th>Parameter</th>
@@ -165,7 +168,7 @@ wp_enqueue_script('monitor-plotly', 'https://cdn.plot.ly/plotly-3.1.0.min.js');
 
     <h3>Filters</h3>
 
-    <table class="widefat" style="width: auto">
+    <table class="widefat">
         <thead>
             <tr>
                 <th>Parameter</th>
@@ -219,7 +222,7 @@ wp_enqueue_script('monitor-plotly', 'https://cdn.plot.ly/plotly-3.1.0.min.js');
         Filter and actions active while sending the last email.
     </p>
 
-    <table class="widefat" style="width: auto">
+    <table class="widefat">
         <thead>
             <tr>
                 <th>Parameter</th>

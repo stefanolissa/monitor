@@ -223,6 +223,42 @@ if (!empty($monitor_settings['scheduler'])) {
     }
 }
 
+
+if (!empty($monitor_settings['http'])) {
+    $monitor_http_log_id = 0;
+    $monitor_http_log_start = 0;
+    add_filter('pre_http_request', function ($value, $args, $url) {
+        global $wpdb, $monitor_http_log_id, $monitor_http_log_start;
+
+        $wpdb->insert($wpdb->prefix . 'monitor_http', ['url' => $url, 'method' => $args['method'],
+            'context' => monitor_get_context(),
+            'args' => serialize($args)]);
+        $monitor_http_log_id = $wpdb->insert_id;
+
+        $monitor_http_log_start = microtime(true);
+
+        return $value;
+    }, 9999, 3);
+
+    add_filter('http_api_debug', function ($response) {
+        global $wpdb, $monitor_http_log_id;
+        if (is_wp_error($response)) {
+            $wpdb->update($wpdb->prefix . 'monitor_http',
+                    ['status' => 1, 'text' => $response->get_error_message()],
+                    ['id' => $monitor_http_log_id]);
+        }
+        return $response;
+    }, 1, 9999);
+
+    add_filter('http_response', function ($response) {
+        global $wpdb, $monitor_http_log_id, $monitor_http_log_start;
+        $wpdb->update($wpdb->prefix . 'monitor_http',
+                ['status' => 0, 'duration' => microtime(true) - $monitor_http_log_start,
+                    'code' => wp_remote_retrieve_response_code($response)],
+                ['id' => $monitor_http_log_id]);
+    }, 1, 9999);
+}
+
 function monitor_get_hook_functions($tag) {
     global $wp_filter;
     if (!isset($wp_filter[$tag])) {
@@ -273,7 +309,7 @@ function monitor_clean_logs() {
 add_filter('update_plugins_satollo_monitor', function ($update, $plugin_data, $plugin_file, $locales) {
 
     $data = get_option('monitor_update_data');
-    if (true || $data->updated < time() - WEEK_IN_SECONDS) {
+    if ($data->updated < time() - WEEK_IN_SECONDS || isset($_GET['force-check'])) {
         $data = null;
     }
 

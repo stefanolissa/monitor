@@ -65,6 +65,25 @@ if ($wpdb->last_error) {
     error_log($wpdb->last_error);
 }
 
+$sql = "CREATE TABLE `" . $wpdb->prefix . "monitor_http` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `status` int NOT NULL DEFAULT 0,
+            `context` varchar(50) NOT NULL DEFAULT '',
+            `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            `url` varchar(250) NOT NULL DEFAULT '',
+            `method` varchar(20) NOT NULL DEFAULT '',
+            `text` varchar(250) NOT NULL DEFAULT '',
+            `duration` double default 0,
+            `code` int default 0,
+            `args` longtext,
+            PRIMARY KEY (`id`)
+            ) $charset_collate;";
+
+dbDelta($sql);
+if ($wpdb->last_error) {
+    error_log($wpdb->last_error);
+}
+
 // Cleanup process
 if (!wp_next_scheduled('monitor_clean_logs') && (!defined('WP_INSTALLING') || !WP_INSTALLING)) {
     wp_schedule_event(time() + 30, 'daily', 'monitor_clean_logs');
