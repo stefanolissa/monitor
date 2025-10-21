@@ -23,8 +23,8 @@ class Monitor_List_Table extends WP_List_Table {
             'created' => 'Created',
             'type' => 'Type',
             'text' => 'Text',
+            'ip' => 'IP',
             'filters' => 'Filters',
-
         ];
         return $columns;
     }
@@ -61,11 +61,17 @@ class Monitor_List_Table extends WP_List_Table {
                 return esc_html($item->text);
             case 'type':
                 return esc_html($item->type);
+            case 'ip':
+                return esc_html($item->ip);
             case 'filters':
-                $url = admin_url('admin-ajax.php') . '?action=monitor-scheduler-filters&id=' . rawurlencode($item->id);
-                $url = wp_nonce_url($url, 'monitor-scheduler-filters');
-                $url .= '&TB_iframe=true'; // Add as last since Thickbox truncate the URL here
-                return '<a class="thickbox" href="' . esc_attr($url) . '">Open</a>';
+                if ($item->type === 'start') {
+                    $url = admin_url('admin-ajax.php') . '?action=monitor-scheduler-filters&id=' . rawurlencode($item->id);
+                    $url = wp_nonce_url($url, 'monitor-scheduler-filters');
+                    $url .= '&TB_iframe=true'; // Add as last since Thickbox truncate the URL here
+                    return '<a class="thickbox" href="' . esc_attr($url) . '">Open</a>';
+                } else {
+                    return '';
+                }
             default:
                 return '?';
         }
@@ -81,10 +87,6 @@ add_thickbox();
     <h2>Scheduler logs</h2>
     <?php include __DIR__ . '/nav.php'; ?>
 
-    <form method="post">
-        <?php wp_nonce_field('monitor-reset'); ?>
-        <button name="reset">Reset</button>
-    </form>
 
     <?php $table->display(); ?>
 

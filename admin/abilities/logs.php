@@ -71,9 +71,8 @@ add_thickbox();
 ?>
 <div class="wrap">
     <h2>Ability calls</h2>
-    <p>
-        <a href="?page=monitor-abilities">List</a> | <a href="?page=monitor-abilities&subpage=logs">Logs</a>
-    </p>
+    <?php include __DIR__ . '/nav.php'; ?>
+
     <?php $table->display(); ?>
 
     <p>

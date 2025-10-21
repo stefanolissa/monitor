@@ -15,11 +15,14 @@ switch ($subpage) {
     case 'filters':
         include __DIR__ . '/filters.php';
         return;
+    case 'jobs':
+        include __DIR__ . '/jobs.php';
+        return;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     check_admin_referer('monitor-reset');
-    // TODO
+    $wpdb->query("truncate {$wpdb->prefix}monitor_scheduler ");
 }
 
 // Yes, I know, it's not the right place. I know.
@@ -41,16 +44,47 @@ if (count($starts) > 2) {
     echo 'Still no data';
     return;
 }
+
+$ready_crons = wp_get_ready_cron_jobs();
+$oldest_timestamp = $ready_crons ? min(array_keys($ready_crons)) : PHP_INT_MAX;
+$crons = _get_cron_array();
+$last_run = (int) get_option('monitor_scheduler_last_run');
+$skipped = $oldest_timestamp < $last_run;
+$doing_cron = get_transient('doing_cron');
+
+// Compute the minimum interval
+$min_interval = MONTH_IN_SECONDS;
+$schedules = wp_get_schedules();
+if (is_array($schedules)) {
+    foreach ($schedules as $key => $data) {
+        if ($data['interval'] < $min_interval) {
+            $min_interval = $data['interval'];
+        }
+    }
+}
 ?>
+<style>
+    .red {
+        color: red;
+    }
+    .orange {
+        color: orange;
+    }
+</style>
 <div class="wrap">
-    <h2>Scheduler activations</h2>
+    <h2>Scheduler</h2>
     <?php include __DIR__ . '/nav.php'; ?>
+
+    <?php if ($skipped) { ?>
+        <div class="notice notice-error">
+            <p>On last run not all scheduled tasks have been executed. Usually it's due to fatal error, PHP execution timeout,
+                or bad object cache implementation.</p>
+        </div>
+    <?php } ?>
 
     <p>
         For detailed information on job scheduling install the WP Crontrol plugin.
     </p>
-
-
 
 
 
@@ -61,84 +95,169 @@ if (count($starts) > 2) {
             <div id="postbox-container-1" class="postbox-container">
 
                 <div id="normal-sortables" class="meta-box-sortables">
-
-                    <div id="monitor-emails" class="postbox " >
+                    <div id="monitor-emails" class="postbox">
 
                         <div class="postbox-header">
-                            <h2 class="hndle">Emails</h2>
-                            <div class="handle-actions hide-if-no-js">
-                                <button type="button" class="handle-order-higher" aria-disabled="false" aria-describedby="dashboard_site_health-handle-order-higher-description">
-                                    <span class="screen-reader-text">Move up</span>
-                                    <span class="order-higher-indicator" aria-hidden="true"></span>
-                                </button>
-                                <span class="hidden" id="dashboard_site_health-handle-order-higher-description">Move Site Health Status box up</span>
-                                <button type="button" class="handle-order-lower" aria-disabled="false" aria-describedby="dashboard_site_health-handle-order-lower-description">
-                                    <span class="screen-reader-text">Move down</span>
-                                    <span class="order-lower-indicator" aria-hidden="true"></span>
-                                </button>
-                                <span class="hidden" id="dashboard_site_health-handle-order-lower-description">Move Site Health Status box down</span>
-                                <button type="button" class="handlediv" aria-expanded="true">
-                                    <span class="screen-reader-text">Toggle panel: Site Health Status</span>
-                                    <span class="toggle-indicator" aria-hidden="true"></span>
-                                </button>
-                            </div>
+                            <h2 class="hndle">Statistics</h2>
                         </div>
 
                         <div class="inside">
 
-
-
                             <table class="widefat" style="width: 100%">
-        <thead>
-            <tr>
-                <th>Parameter</th>
-                <th>Value</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <th>Average delay</th>
-                <td><?php echo esc_html((int) $avg); ?></td>
-            </tr>
-            <tr>
-                <th>Maximum delay</th>
-                <td><?php echo esc_html($max); ?></td>
-            </tr>
-            <tr>
-                <th>Minimum delay</th>
-                <td><?php echo esc_html($min); ?></td>
-            </tr>
-            <tr>
-                <th><code>DISABLE_WP_CRON</code></th>
-                <td><?php echo (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) ? 'true' : 'false'; ?></td>
-            </tr>
-            <tr>
-                <th><code>ALTERNATE_WP_CRON</code></th>
-                <td><?php echo (defined('ALTERNATE_WP_CRON') && ALTERNATE_WP_CRON) ? 'true' : 'false'; ?></td>
-            </tr>
-            <tr>
-                <th><code>WP_CRON_LOCK_TIMEOUT</code></th>
-                <td><?php echo esc_html(WP_CRON_LOCK_TIMEOUT); ?></td>
-            </tr>
-        </tbody>
-    </table>
+                                <thead>
+                                    <tr>
+                                        <th>Parameter</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th>Average delay</th>
+                                        <td>
+                                            <?php
+                                            if ($avg > $min_interval) {
+                                                echo '<span class="red">', monitor_format_interval($avg), '</span>';
+                                                echo '<br><small>Greater than the minimim frequency</small>';
+                                            } else {
+                                                echo '<span class="green">', monitor_format_interval($avg), '</span>';
+                                            }
+                                            ?>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Maximum delay</th>
+                                        <td><?php echo monitor_format_interval($max); ?></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Minimum delay</th>
+                                        <td><?php echo esc_html($min); ?> seconds</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Last run</th>
+                                        <td><?php echo wp_date('Y-m-d h:i:s', $last_run); ?></td>
+                                    </tr>
 
+                                </tbody>
+                            </table>
+
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="postbox-container-2" class="postbox-container">
+
+                <div id="normal-sortables" class="meta-box-sortables">
+
+                    <div id="monitor-emails" class="postbox">
+
+                        <div class="postbox-header">
+                            <h2 class="hndle">Values</h2>
+
+                        </div>
+
+                        <div class="inside">
+                            <table class="widefat" style="width: 100%">
+                                <thead>
+                                    <tr>
+                                        <th>Parameter</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th>Minimum frequency</th>
+                                        <td><?php echo monitor_format_interval($min_interval); ?></td>
+                                    </tr>
+                                    <tr>
+                                        <th><code>DISABLE_WP_CRON</code></th>
+                                        <td><?php echo (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) ? '<span class="orange">true</span>' : 'false</span>'; ?></td>
+                                    </tr>
+                                    <tr>
+                                        <th><code>ALTERNATE_WP_CRON</code></th>
+                                        <td><?php echo (defined('ALTERNATE_WP_CRON') && ALTERNATE_WP_CRON) ? 'true' : 'false'; ?></td>
+                                    </tr>
+                                    <tr>
+                                        <th><code>WP_CRON_LOCK_TIMEOUT</code></th>
+                                        <td><?php echo esc_html(WP_CRON_LOCK_TIMEOUT); ?></td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>Transient <code>doing_cron</code></td>
+
+                                        <td>
+                                            <?php
+                                            if ($doing_cron) {
+                                                echo '<span class="orange">', monitor_format_interval(time() - (int) $doing_cron), '</span>';
+                                            }
+                                            ?>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+            <div id="postbox-container-2" class="postbox-container">
+
+                <div id="normal-sortables" class="meta-box-sortables">
+
+                    <div id="monitor-schduler-jobs" class="postbox">
+
+                        <div class="postbox-header">
+                            <h2 class="hndle">Jobs</h2>
+
+                        </div>
+
+                        <div class="inside">
+                            <table class="widefat" style="width: 100%">
+                                <thead>
+                                    <tr>
+                                        <th>Parameter</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th>Jobs to be executed</th>
+                                        <td><?php echo count($ready_crons); ?></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Scheduled jobs</th>
+                                        <td><?php echo count($crons); ?></td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
 
                         </div>
                     </div>
 
-
-
-
                 </div>
             </div>
+
+
+
         </div>
     </div>
 
 
 
 
-    <div id="graph" style="margin: 2rem 0 0 0"></div>
+    <div id="graph" style="margin: 1.5rem 0"></div>
+
+    <form method="post">
+        <?php wp_nonce_field('monitor-reset'); ?>
+        <button name="reset" class="button button-secondary">Reset</button>
+    </form>
 </div>
 
 <script>

@@ -23,9 +23,12 @@ class Emails_List_Table extends WP_List_Table {
     public function get_columns() {
         $columns = [
             'created' => 'Created',
+            'status' => 'Status',
             'subject' => 'Subject',
             'to' => 'To',
             'context' => 'Context',
+            'duration' => 'Duration (ms)',
+            'text' => 'Note',
             'filters' => 'Filters'
         ];
         return $columns;
@@ -71,17 +74,23 @@ class Emails_List_Table extends WP_List_Table {
         switch ($column_name) {
             case 'created':
                 return esc_html($item->created);
+            case 'status':
+                return $item->status == 0 ? 'Success' : '<span class="red">Failed</span>';
             case 'subject':
                 return esc_html($item->subject);
             case 'to':
                 return esc_html($item->to);
             case 'context':
                 return esc_html($item->context);
+            case 'duration':
+                return round($item->duration, 3) . ' seconds';
+            case 'text':
+                return esc_html($item->text);
             case 'filters':
                 $url = admin_url('admin-ajax.php') . '?action=monitor-emails-filters&id=' . rawurlencode($item->id);
                 $url = wp_nonce_url($url, 'monitor-emails-filters');
                 $url .= '&TB_iframe=true'; // Add as last since Thickbox truncate the URL here
-                return '<a class="thickbox" href="' . esc_attr($url) . '">Data</a>';
+                return '<a class="thickbox" href="' . esc_attr($url) . '">View</a>';
             default:
                 return '?';
         }
@@ -93,6 +102,14 @@ $table->prepare_items();
 
 add_thickbox();
 ?>
+<style>
+    .red {
+        color: red;
+    }
+    .orange {
+        color: orange;
+    }
+</style>
 <div class="wrap">
     <h2>Emails</h2>
     <?php include __DIR__ . '/nav.php'; ?>

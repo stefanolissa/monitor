@@ -16,21 +16,39 @@
  */
 defined('ABSPATH') || exit;
 
+define('MONITOR_VERSION', '0.0.3');
+
 /** @var wpdb $wpdb */
 register_activation_hook(__FILE__, function () {
-    require_once __DIR__ . '/admin/activate.php';
+    //require_once __DIR__ . '/admin/activate.php';
 });
 
 register_deactivation_hook(__FILE__, function () {
     delete_option('monitor_emails_hooks');
     delete_option('monitor_scheduler_hooks');
     delete_option('monitor_update_data');
+    wp_unschedule_hook('monitor');
 });
 
 $monitor_settings = get_option('monitor');
 
 if (is_admin()) {
     require_once __DIR__ . '/admin/admin.php';
+}
+
+if (WP_DEBUG) {
+
+    add_filter('cron_schedules', function ($schedules) {
+        $schedules['monitor_test'] = [
+            'interval' => 60,
+            'display' => 'Monitor Test'
+        ];
+        return $schedules;
+    });
+
+    if (!wp_next_scheduled('monitor_test')) {
+        wp_schedule_event(time(), 'monitor_test', 'monitor_test');
+    }
 }
 
 function monitor_get_context() {
@@ -53,8 +71,10 @@ function monitor_get_context() {
  * Emails monitoring
  */
 if (!empty($monitor_settings['emails'])) {
+    $monitor_emails_log_id = 0;
+    $monitor_emails_log_start = 0;
     add_filter('wp_mail', function ($atts) {
-        global $wpdb;
+        global $wpdb, $monitor_emails_log_id, $monitor_emails_log_start;
 
         $context = monitor_get_context();
 
@@ -72,44 +92,66 @@ if (!empty($monitor_settings['emails'])) {
         ];
         $wpdb->insert($wpdb->prefix . 'monitor_emails', ['user_id' => $user_id, 'subject' => $atts['subject'], 'to' => $atts['to'],
             'context' => $context, 'filters' => serialize($hooks)]);
+        $monitor_emails_log_id = $wpdb->insert_id;
+        $monitor_emails_log_start = microtime(true);
         return $atts;
     }, 9999);
+
+    add_action('wp_mail_succeeded', function () {
+        global $wpdb, $monitor_emails_log_id, $monitor_emails_log_start;
+        $wpdb->update($wpdb->prefix . 'monitor_emails',
+                ['duration' => microtime(true) - $monitor_emails_log_start, 'status' => 0],
+                ['id' => $monitor_emails_log_id]);
+        $monitor_emails_log_id = 0;
+    }, 0);
+
+    add_action('wp_mail_failed', function ($wp_error) {
+        global $wpdb, $monitor_emails_log_id, $monitor_emails_log_start;
+        $wpdb->update($wpdb->prefix . 'monitor_emails',
+                ['duration' => microtime(true) - $monitor_emails_log_start, 'status' => 1, 'text' => $wp_error->get_error_message()],
+                ['id' => $monitor_emails_log_id]);
+        $monitor_emails_log_id = 0;
+    }, 0);
 }
 
-$monitor_ability_method = 'php';
 
 /**
  * Abilities monitoring
  */
-// Uhm, it is defined after the filter... bah...
-//if (defined('REST_REQUEST') && REST_REQUEST) {
-//}
-// Attempt to track how the ability is invoked
-add_filter('rest_pre_dispatch', function ($value, $server, WP_REST_Request $request) {
-    global $monitor_ability_method;
-    if (str_starts_with($request->get_route(), '/wp/v2/abilities/')) {
-        $monitor_ability_method = 'rest';
-    }
-    return $value;
-}, 0, 3);
+if (!empty($monitor_settings['abilities'])) {
+    $monitor_ability_method = 'php';
 
-add_action('after_execute_ability', function ($name, $input, $result) {
-    global $wpdb, $monitor_ability_method;
+    // Uhm, it is defined after the filter... bah...
+    //if (defined('REST_REQUEST') && REST_REQUEST) {
+    //}
+    // Attempt to track how the ability is invoked
+    add_filter('rest_pre_dispatch', function ($value, $server, WP_REST_Request $request) {
+        global $monitor_ability_method;
+        if (str_starts_with($request->get_route(), '/wp/v2/abilities/')) {
+            $monitor_ability_method = 'rest';
+        }
+        return $value;
+    }, 0, 3);
 
-    //die('xxxx');
-    // It could not be useful, anyway...
-    $context = monitor_get_context();
+    add_action('after_execute_ability', function ($name, $input, $result) {
+        global $wpdb, $monitor_ability_method;
 
-    $user_id = is_user_logged_in() ? get_current_user_id() : 0;
-    $input = wp_json_encode($input);
-    $result = wp_json_encode($result);
-    $wpdb->insert($wpdb->prefix . 'monitor_abilities', ['user_id' => $user_id,
-        'method' => $monitor_ability_method, 'name' => $name, 'context' => $context,
-        'input' => $input, 'output' => $result]);
-    if ($wpdb->last_error) {
-        error_log($wpdb->last_error);
-    }
-}, 0, 3);
+        // It could not be useful, anyway...
+        $context = monitor_get_context();
+
+        $user_id = is_user_logged_in() ? get_current_user_id() : 0;
+        $input = wp_json_encode($input);
+        $result = wp_json_encode($result);
+        $wpdb->insert($wpdb->prefix . 'monitor_abilities', ['user_id' => $user_id,
+            'method' => $monitor_ability_method, 'name' => $name, 'context' => $context,
+            'input' => $input, 'output' => $result]);
+        if ($wpdb->last_error) {
+            error_log($wpdb->last_error);
+        }
+    }, 0, 3);
+}
+
+
 
 /**
  * Scheduler monitoring
@@ -123,8 +165,14 @@ if (!empty($monitor_settings['scheduler'])) {
             $context = 'cli';
         }
 
-        $wpdb->insert($wpdb->prefix . 'monitor_scheduler', ['type' => 'start', 'ip' => '',
-            'context' => $context, 'text' => 'Started']);
+        update_option('monitor_scheduler_last_run', time(), false);
+
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+
+        $jobs = count(wp_get_ready_cron_jobs());
+
+        $wpdb->insert($wpdb->prefix . 'monitor_scheduler', ['type' => 'start', 'ip' => $ip,
+            'context' => $context, 'text' => 'Started: ' . $jobs . ' jobs to be executed']);
 
         $monitor_scheduler_log_id = $wpdb->insert_id;
 
@@ -174,10 +222,6 @@ if (!empty($monitor_settings['scheduler'])) {
         }, 9999);
     }
 }
-
-
-
-
 
 function monitor_get_hook_functions($tag) {
     global $wp_filter;

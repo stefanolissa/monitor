@@ -13,15 +13,11 @@ switch ($subpage) {
 
 class Abilities_List_Table extends WP_List_Table {
 
-    /**
-     * Constructor for the class.
-     * Sets up the list table properties.
-     */
     public function __construct() {
         parent::__construct([
-            'singular' => 'Ability', // Singular name of the listed records.
-            'plural' => 'Abilities', // Plural name of the listed records.
-            'ajax' => false, // Does this table support ajax?
+            'singular' => 'Ability',
+            'plural' => 'Abilities',
+            'ajax' => false,
         ]);
     }
 
@@ -39,10 +35,6 @@ class Abilities_List_Table extends WP_List_Table {
         return $columns;
     }
 
-    /**
-     * Prepares the data for the list table.
-     * This is where you would fetch data from a database, file, or API.
-     */
     public function prepare_items() {
         if (!function_exists('wp_get_abilities')) {
             $this->items = [];
@@ -98,8 +90,10 @@ $table->prepare_items();
 ?>
 <div class="wrap">
     <h2>Abilities</h2>
+    <?php include __DIR__ . '/nav.php'; ?>
+
     <p>
-        <a href="?page=monitor-abilities">List</a> | <a href="?page=monitor-abilities&subpage=logs">Logs</a>
+        Abilities are something new available since WP 6.9 and a foundation to integrate AI into WP.
     </p>
 
     <?php $table->display(); ?>

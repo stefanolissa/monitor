@@ -2,14 +2,35 @@
 
 defined('ABSPATH') || exit;
 
+$monitor_version = get_option('monitor_version');
+if (MONITOR_VERSION !== $monitor_version) {
+    if (WP_DEBUG) {
+        error_log('Monitor > Version change');
+    }
+    include_once __DIR__ . '/activate.php';
+    update_option('monitor_version', MONITOR_VERSION, false);
+}
+
+function monitor_format_interval($delta) {
+    $seconds = $delta % MINUTE_IN_SECONDS;
+    $minutes = floor($delta % HOUR_IN_SECONDS / MINUTE_IN_SECONDS);
+    $hours = floor($delta % DAY_IN_SECONDS / HOUR_IN_SECONDS);
+    $days = floor($delta / DAY_IN_SECONDS);
+    return ($days ? $days . ' days, ' : '')
+            . ($days || $hours ? $hours . ' hours, ' : '')
+            . ($days || $hours || $minutes ? $minutes . ' minutes, ' : '')
+            . $seconds . ' seconds';
+}
+
 add_action('admin_menu', function () {
 
-    add_menu_page(
-            'Monitor', 'Monitor', 'administrator', 'monitor',
+    add_menu_page('Monitor', 'Monitor', 'administrator', 'monitor', '', 'dashicons-performance', 6);
+
+    add_submenu_page(
+            'monitor', 'Settings', 'Settings', 'administrator', 'monitor',
             function () {
                 include __DIR__ . '/index.php';
-            },
-            'dashicons-performance', 6
+            }
     );
 
     add_submenu_page(
@@ -92,7 +113,6 @@ add_action('wp_ajax_monitor-scheduler-filters', function () {
     die();
 });
 
-
 add_action('abilities_api_init', function () {
 
     $r = wp_register_ability('monitor/overview',
@@ -160,9 +180,9 @@ add_action('abilities_api_init', function () {
                     $sent_emails = (int) $wpdb->get_var("select count(*) from {$wpdb->prefix}monitor_emails WHERE created > DATE_SUB(NOW(), INTERVAL 30 DAY)");
 
                     $result = [
-                                'sent_emails' => $sent_emails,
-                                'scheduler_statistics' => "Average call interval {$avg} seconds, maximum interval {$max} seconds, minimum interval {$min} seconds. The required average interval is {$min_interval}",
-                                'abilities_statistics' => 'Abilities invoked 450 times'
+                        'sent_emails' => $sent_emails,
+                        'scheduler_statistics' => "Average call interval {$avg} seconds, maximum interval {$max} seconds, minimum interval {$min} seconds. The required average interval is {$min_interval}",
+                        'abilities_statistics' => 'Abilities invoked 450 times'
                     ];
 
                     $result['scheduler_notes'] = $ok ? 'Everything fine' : "The scheduler is not triggered enough often, the minumum interval should be {$min_interval}";

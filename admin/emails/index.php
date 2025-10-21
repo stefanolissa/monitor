@@ -34,6 +34,8 @@ function hook_functions_frontend($tag) {
 }
 
 $sent = $wpdb->get_var("select count(*) from {$wpdb->prefix}monitor_emails");
+$success = $wpdb->get_var("select count(*) from {$wpdb->prefix}monitor_emails where status=0");
+$failed = $wpdb->get_var("select count(*) from {$wpdb->prefix}monitor_emails where status=1");
 
 $sent_30_days = $wpdb->get_var("select count(*) from {$wpdb->prefix}monitor_emails where created > DATE_SUB(NOW(), INTERVAL 30 DAY)");
 
@@ -46,6 +48,8 @@ foreach ($sent_per_day as $data) {
     $sent_per_day_y[] = $data->total;
 }
 
+$avg_duration = $wpdb->get_var("select avg(duration) from {$wpdb->prefix}monitor_emails");
+
 // Yes, I know, it's not the right place. I know.
 wp_enqueue_script('monitor-plotly', 'https://cdn.plot.ly/plotly-3.1.0.min.js');
 ?>
@@ -53,27 +57,94 @@ wp_enqueue_script('monitor-plotly', 'https://cdn.plot.ly/plotly-3.1.0.min.js');
     <h2>Emails</h2>
     <?php include __DIR__ . '/nav.php'; ?>
 
-    <p>With too less data, graphs could be broken, just wait some time...</p>
+    <p>With not enough data, graphs could be broken, just wait some time...</p>
 
-    <h2>Statistics</h2>
-    <table class="widefat" style="width: auto">
-        <thead>
-            <tr>
-                <th>Parameter</th>
-                <th>Value</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <th>Emails sent</th>
-                <td><?php echo (int) $sent; ?></td>
-            </tr>
-            <tr>
-                <th>Emails sent last 30 days</th>
-                <td><?php echo (int) $sent_30_days; ?></td>
-            </tr>
-        </tbody>
-    </table>
+    <div id="dashboard-widgets-wrap">
+        <div id="dashboard-widgets" class="metabox-holder">
+
+
+            <div id="postbox-container-1" class="postbox-container">
+                <div id="normal-sortables" class="meta-box-sortables">
+                    <div id="monitor-emails-1" class="postbox">
+
+                        <div class="postbox-header">
+                            <h2 class="hndle">Statistics</h2>
+                        </div>
+
+                        <div class="inside">
+
+                            <table class="widefat" style="width: auto">
+                                <thead>
+                                    <tr>
+                                        <th>Parameter</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th>Emails sent</th>
+                                        <td><?php echo (int) $sent; ?></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Emails sent last 30 days</th>
+                                        <td><?php echo (int) $sent_30_days; ?></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Mean duration to send an email</th>
+                                        <td><?php echo round($avg_duration, 3); ?> seconds</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="postbox-container-2" class="postbox-container">
+                <div id="normal-sortables" class="meta-box-sortables">
+                    <div id="monitor-emails-2" class="postbox">
+
+                        <div class="postbox-header">
+                            <h2 class="hndle">Statistics</h2>
+                        </div>
+
+                        <div class="inside">
+
+                            <table class="widefat" style="width: auto">
+                                <thead>
+                                    <tr>
+                                        <th>Parameter</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th>Successfully sent</th>
+                                        <td><?php echo (int) $success; ?></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Failed</th>
+                                        <td><?php echo (int) $failed; ?></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Mean duration to send an email</th>
+                                        <td><?php echo round($avg_duration, 3); ?> seconds</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+    </div>
+
+
 
     <div id="graph" style="margin: 2rem 0 0 0"></div>
 

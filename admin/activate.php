@@ -32,12 +32,15 @@ if ($wpdb->last_error) {
 $sql = "CREATE TABLE `" . $wpdb->prefix . "monitor_emails` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
             `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            `status` int NOT NULL DEFAULT 0,
             `user_id` int NOT NULL DEFAULT 0,
             `from` varchar(200) NOT NULL DEFAULT '',
             `to` varchar(200) NOT NULL DEFAULT '',
             `subject` varchar(200) NOT NULL DEFAULT '',
             `context` varchar(50) NOT NULL DEFAULT '',
             `filters` longtext,
+            `duration` double default 0,
+            `text` varchar(250) NOT NULL DEFAULT '',
             PRIMARY KEY (`id`)
             ) $charset_collate;";
 
