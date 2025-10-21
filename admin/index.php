@@ -18,6 +18,11 @@ wp_enqueue_script('dashboard');
         statistics and logs. If you have any specific need, write me at stefano@satollo.net.
     </p>
 
+    <p>
+        <a href="https://www.satollo.net/plugins/monitor" target="_blank">Please read the official page</a> until I find the time to integrate more information
+        directly on the monitor pages. Thank you.
+    </p>
+
 
     <form method="post">
         <?php wp_nonce_field('monitor-save'); ?>
