@@ -43,7 +43,10 @@ wp_enqueue_script('monitor-plotly', 'https://cdn.plot.ly/plotly-3.1.0.min.js');
     <script>
         jQuery(function () {
             var layout = {
-                title: {text: 'Requests per day'}
+                title: {text: 'Requests per day'},
+                yaxis: {
+                    rangemode: 'tozero'
+                }
             };
             var data = [{
                     x: <?php echo json_encode($per_day_x); ?>,
