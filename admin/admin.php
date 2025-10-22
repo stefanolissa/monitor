@@ -22,6 +22,11 @@ function monitor_format_interval($delta) {
             . $seconds . ' seconds';
 }
 
+add_action('admin_init', function () {
+    // That old compatibility script when the emojii/unicode symbols were not correctly managed by nrowsers...
+    remove_action('admin_print_scripts', 'print_emoji_detection_script');
+});
+
 add_action('admin_menu', function () {
 
     add_menu_page('Monitor', 'Monitor', 'administrator', 'monitor', '', 'dashicons-performance', 6);
@@ -115,6 +120,30 @@ add_action('wp_ajax_monitor-scheduler-filters', function () {
                 echo esc_html($function), '<br>';
             }
             echo '<br>';
+        }
+    }
+    die();
+});
+
+add_action('wp_ajax_monitor-http-args', function () {
+    global $wpdb;
+    check_ajax_referer('monitor-http-args');
+    $id = (int) $_GET['id'];
+    $log = $wpdb->get_row($wpdb->prepare("select args from {$wpdb->prefix}monitor_http where id=%d limit 1", $id));
+    if (!$log) {
+        wp_send_json_error();
+    } else {
+        echo '<pre style="white-space: normal;">';
+        $args = unserialize($log->args);
+        foreach ($args as $k => $v) {
+            if (is_array($v)) {
+                echo '<strong>', esc_html($k), '</strong>:<br>';
+                foreach ($v as $k2 => $v2) {
+                    echo '&nbsp;&nbsp;&nbsp;', esc_html($k2), ': ', esc_html($v2), '<br>';
+                }
+            } else {
+                echo '<strong>', esc_html($k), '</strong>: ', esc_html($v), '<br>';
+            }
         }
     }
     die();

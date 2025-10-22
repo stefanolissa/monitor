@@ -1,6 +1,15 @@
 <?php
 defined('ABSPATH') || exit;
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    check_admin_referer('monitor-action');
+    if (true || WP_DEBUG) {
+        if (isset($_POST['test'])) {
+            wp_mail(get_option('admin_email'), 'Email from Monitor plugin', 'Hi, this message confirms the emails are correctly delivered');
+        }
+    }
+}
+
 class Emails_List_Table extends WP_List_Table {
 
     /**
@@ -75,7 +84,7 @@ class Emails_List_Table extends WP_List_Table {
             case 'created':
                 return esc_html($item->created);
             case 'status':
-                return $item->status == 0 ? 'Success' : '<span class="red">Failed</span>';
+                return $item->status == 0 ? '<span class="green">✔</span>' : '<span class="red">✖</span>';
             case 'subject':
                 return esc_html($item->subject);
             case 'to':
@@ -103,12 +112,7 @@ $table->prepare_items();
 add_thickbox();
 ?>
 <style>
-    .red {
-        color: red;
-    }
-    .orange {
-        color: orange;
-    }
+    <?php include __DIR__ . '/../style.css'; ?>
 </style>
 <div class="wrap">
     <h2>Emails</h2>
@@ -116,6 +120,13 @@ add_thickbox();
     <p>
         Consider the plugin WP Mail Logging if you need a serious logging of sent emails.
     </p>
+
+    <?php if (true || WP_DEBUG) { ?>
+        <form method="post">
+            <?php wp_nonce_field('monitor-action'); ?>
+            <button name="test" class="button button-secondary">Send test email</button>
+        </form>
+    <?php } ?>
 
     <?php $table->display(); ?>
 </div>

@@ -30,9 +30,10 @@ class Monitor_List_Table extends WP_List_Table {
             'method' => 'Method',
             'code' => 'Code',
             'url' => 'URL',
-            'duration' => 'Duration (ms)',
+            'duration' => 'Duration (s)',
             'text' => 'Note',
             'context' => 'Context',
+            'args' => 'Args',
         ];
         return $columns;
     }
@@ -72,18 +73,15 @@ class Monitor_List_Table extends WP_List_Table {
             case 'context':
                 return esc_html($item->context);
             case 'duration':
-                return round($item->duration, 3) . ' seconds';
+                return round($item->duration, 3);
             case 'text':
                 return esc_html($item->text);
-            case 'filters':
-                if ($item->type === 'start') {
-                    $url = admin_url('admin-ajax.php') . '?action=monitor-http-filters&id=' . rawurlencode($item->id);
-                    $url = wp_nonce_url($url, 'monitor-http-filters');
-                    $url .= '&TB_iframe=true'; // Add as last since Thickbox truncate the URL here
-                    return '<a class="thickbox" href="' . esc_attr($url) . '">Open</a>';
-                } else {
-                    return '';
-                }
+            case 'args':
+                $url = admin_url('admin-ajax.php') . '?action=monitor-http-args&id=' . rawurlencode($item->id);
+                $url = wp_nonce_url($url, 'monitor-http-args');
+                $url .= '&TB_iframe=true'; // Add as last since Thickbox truncate the URL here
+                return '<a class="thickbox" href="' . esc_attr($url) . '">view</a>';
+
             default:
                 return '?';
         }
@@ -95,6 +93,21 @@ $table->prepare_items();
 
 add_thickbox();
 ?>
+<style>
+<?php include __DIR__ . '/../style.css'; ?>
+    .column-duration {
+        width: 5rem;
+    }
+    .column-method {
+        width: 5rem;
+    }
+    .column-code {
+        width: 3rem;
+    }
+    .column-url {
+        width: 20rem;
+    }
+</style>
 <div class="wrap">
     <h2>HTTP Logs</h2>
     <?php include __DIR__ . '/nav.php'; ?>

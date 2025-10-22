@@ -34,7 +34,7 @@ wp_enqueue_script('monitor-plotly', 'https://cdn.plot.ly/plotly-3.1.0.min.js');
 
     <p></p>
 
-    <div id="graph" style="margin: 2rem 0 0 0"></div>
+    <div id="graph" style="margin: 2rem 0"></div>
 
     <form method="post">
         <?php wp_nonce_field('monitor-reset'); ?>

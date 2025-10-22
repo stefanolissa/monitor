@@ -73,8 +73,8 @@ $sql = "CREATE TABLE `" . $wpdb->prefix . "monitor_http` (
             `url` varchar(250) NOT NULL DEFAULT '',
             `method` varchar(20) NOT NULL DEFAULT '',
             `text` varchar(250) NOT NULL DEFAULT '',
-            `duration` double default 0,
-            `code` int default 0,
+            `duration` double NOT NULL default 0,
+            `code` int NOT NULL default 0,
             `args` longtext,
             PRIMARY KEY (`id`)
             ) $charset_collate;";

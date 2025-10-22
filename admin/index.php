@@ -61,6 +61,14 @@ wp_enqueue_script('dashboard');
             </tr>
             <tr>
                 <th>
+                    Include the wp-cron.php autocall
+                </th>
+                <td>
+                    <input type="checkbox" value="1" name="data[http_wpcron]" <?php echo isset($data['http_wpcron']) ? 'checked' : ''; ?>>
+                </td>
+            </tr>
+            <tr>
+                <th>
                     Keep logs for
                 </th>
                 <td>

@@ -18,6 +18,7 @@ Records events like sent email, abilities execution, scheduler triggers. For dev
 * **Abilities**: both the registered abilities and the executions
 * **Emails**: sent emails (for more detailed logging I suggest the WP Mail Logging plugin
 * **Scheduler**: records the trigger call top the wp-cron.php script
+* **HTTP**: records the requests to external URLs
 
 == Frequently Asked Questions ==
 
@@ -28,6 +29,17 @@ None, at moment.
 None, at moment.
 
 == Changelog ==
+
+= 0.0.7 =
+
+* Improved HTTP monitoring
+* Fixed monitoring of long URLs
+* Excluded wp-cron.php autocall from HTTP monitoring
+* Added test email
+
+= 0.0.6 =
+
+* Fixed HTTP monitoring
 
 = 0.0.5 =
 

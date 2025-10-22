@@ -44,6 +44,18 @@ if (count($starts) > 2) {
     echo 'Still no data';
     return;
 }
+//
+//if (count($deltas) > 5) {
+//    $moving_window = 10;
+//    $deltas_moving = [];
+//    $deltas_moving[0] = array_sum(array_slice($deltas, 0, $moving_window)) / $moving_window;
+//    $current = 1;
+//    for ($i = $moving_window; $i < count($deltas); $i++) {
+//        $deltas_moving[$current] = $deltas[$i] / $moving_window + $deltas_moving[$current - 1] - $deltas[$i - $moving_window] / $moving_window;
+//        $current++;
+//
+//    }
+//}
 
 $ready_crons = wp_get_ready_cron_jobs();
 $oldest_timestamp = $ready_crons ? min(array_keys($ready_crons)) : PHP_INT_MAX;
@@ -254,6 +266,8 @@ if (is_array($schedules)) {
 
     <div id="graph" style="margin: 1.5rem 0"></div>
 
+    <div id="moving-avg" style="margin: 1.5rem 0"></div>
+
     <form method="post">
         <?php wp_nonce_field('monitor-reset'); ?>
         <button name="reset" class="button button-secondary">Reset</button>
@@ -271,5 +285,12 @@ if (is_array($schedules)) {
             }];
 
         Plotly.newPlot('graph', data, layout);
+
+//        var data2 = [{
+//                //x: [1, 2, 3, 4, 5],
+//                y: <?php echo json_encode($deltas_moving); ?>
+//            }];
+//
+//        Plotly.newPlot('moving-avg', data2, layout);
     });
 </script>

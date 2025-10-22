@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Monitor
  * Description: Records and display WP events: emails, abilities, scheduler
- * Version: 0.0.3
+ * Version: 0.0.7
  * Author: satollo
  * Author URI: https://www.satollo.net
  * License: GPL-2.0+
@@ -16,7 +16,7 @@
  */
 defined('ABSPATH') || exit;
 
-define('MONITOR_VERSION', '0.0.3');
+define('MONITOR_VERSION', '0.0.7');
 
 /** @var wpdb $wpdb */
 register_activation_hook(__FILE__, function () {
@@ -227,12 +227,25 @@ if (!empty($monitor_settings['scheduler'])) {
 if (!empty($monitor_settings['http'])) {
     $monitor_http_log_id = 0;
     $monitor_http_log_start = 0;
-    add_filter('pre_http_request', function ($value, $args, $url) {
-        global $wpdb, $monitor_http_log_id, $monitor_http_log_start;
 
-        $wpdb->insert($wpdb->prefix . 'monitor_http', ['url' => $url, 'method' => $args['method'],
+    // See class-wp-http.php
+    add_filter('pre_http_request', function ($value, $args, $url) {
+        global $wpdb, $monitor_http_log_id, $monitor_http_log_start, $monitor_settings;
+
+        if (empty($monitor_settings['http_wpcron']) && strpos($url, '/wp-cron.php') !== false) {
+            return $value;
+        }
+
+        $args['url'] = $url; // Save the full URL
+        $url = substr($url, 0, min(255, strlen($url)));
+
+        $r = $wpdb->insert($wpdb->prefix . 'monitor_http', ['url' => $url, 'method' => $args['method'],
             'context' => monitor_get_context(),
             'args' => serialize($args)]);
+        if (!$r) {
+            error_log($wpdb->last_error);
+        }
+
         $monitor_http_log_id = $wpdb->insert_id;
 
         $monitor_http_log_start = microtime(true);
@@ -240,23 +253,32 @@ if (!empty($monitor_settings['http'])) {
         return $value;
     }, 9999, 3);
 
+    // See class-wp-http.php
     add_filter('http_api_debug', function ($response) {
-        global $wpdb, $monitor_http_log_id;
+        global $wpdb, $monitor_http_log_id, $monitor_http_log_start;
+
+        if (!$monitor_http_log_id) {
+            return $response;
+        }
+
         if (is_wp_error($response)) {
             $wpdb->update($wpdb->prefix . 'monitor_http',
                     ['status' => 1, 'text' => $response->get_error_message()],
                     ['id' => $monitor_http_log_id]);
-        }
-        return $response;
-    }, 1, 9999);
-
-    add_filter('http_response', function ($response) {
-        global $wpdb, $monitor_http_log_id, $monitor_http_log_start;
-        $wpdb->update($wpdb->prefix . 'monitor_http',
+        } else {
+            $wpdb->update($wpdb->prefix . 'monitor_http',
                 ['status' => 0, 'duration' => microtime(true) - $monitor_http_log_start,
                     'code' => wp_remote_retrieve_response_code($response)],
                 ['id' => $monitor_http_log_id]);
+        }
+        $monitor_http_log_id = 0;
+        return $response;
     }, 1, 9999);
+
+//    add_filter('http_response', function ($response) {
+//        global $wpdb, $monitor_http_log_id, $monitor_http_log_start;
+//        return $response;
+//    }, 1, 9999);
 }
 
 function monitor_get_hook_functions($tag) {
