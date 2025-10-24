@@ -32,6 +32,8 @@ register_deactivation_hook(__FILE__, function () {
 
 $monitor_settings = get_option('monitor');
 
+require_once __DIR__ . '/includes/register-abilities.php';
+
 if (is_admin()) {
     require_once __DIR__ . '/admin/admin.php';
 }
