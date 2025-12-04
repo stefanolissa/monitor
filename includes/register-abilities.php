@@ -1,12 +1,21 @@
 <?php
+
 defined('ABSPATH') || exit;
 
-add_action('abilities_api_init', function () {
+add_action('wp_abilities_api_categories_init', function () {
+    wp_register_ability_category('monitor', [
+        'label' => 'Monitor',
+        'description' => 'Abilities provided by the monitor plugin',
+    ]);
+});
+
+add_action('wp_abilities_api_init', function () {
 
     $r = wp_register_ability('monitor/overview',
             [
                 'label' => 'Return an overview of the site health',
                 'description' => 'Return an overview of the site health: emails sent, activities invoked, scheduler statistics',
+                'category' => 'monitor',
                 'input_schema' => [
                     'type' => 'object',
                     'properties' => [],
@@ -68,8 +77,6 @@ add_action('abilities_api_init', function () {
 
                     $result = '';
 
-
-
                     $sent_emails = (int) $wpdb->get_var("select count(*) from {$wpdb->prefix}monitor_emails WHERE created > DATE_SUB(NOW(), INTERVAL 30 DAY)");
 
                     $result .= "The site sent {$sent_emails} over the last 30 days. ";
@@ -93,9 +100,7 @@ add_action('abilities_api_init', function () {
                 'permission_callback' => function () {
                     return current_user_can('administrator');
                 },
-                'meta' => [
-                    'category' => 'monitor',
-                ],
+
             ]
     );
 });

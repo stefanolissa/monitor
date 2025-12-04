@@ -22,6 +22,10 @@ function monitor_format_interval($delta) {
             . $seconds . ' seconds';
 }
 
+function monitor_get_emails_statistics() {
+    return [];
+}
+
 add_action('admin_init', function () {
     // That old compatibility script when the emojii/unicode symbols were not correctly managed by nrowsers...
     remove_action('admin_print_scripts', 'print_emoji_detection_script');

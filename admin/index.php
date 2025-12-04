@@ -1,14 +1,26 @@
 <?php
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     check_admin_referer('monitor-save');
+    $data = wp_kses_post_deep(wp_unslash($_POST['data']));
 
     // TODO: cleanup the options
-    update_option('monitor', $_POST['data']);
+    update_option('monitor', $data);
+
+    // Report
+    wp_unschedule_hook('monitor_report');
+    if (!empty($data['report'])) {
+        $when = $data['report'] == 'weekly' ? WEEK_IN_SECONDS : DAY_IN_SECONDS;
+        wp_schedule_event(time() + $when, $data['report'], 'monitor_report');
+    }
 }
 
 $data = get_option('monitor', []);
 
 wp_enqueue_script('dashboard');
+
+$log_days = $data['log_days'] ?? 30;
+$report = $data['report'] ?? '';
+$alerts = $data['alerts'] ?? '';
 ?>
 <div class="wrap">
     <h2>Monitor</h2>
@@ -72,11 +84,33 @@ wp_enqueue_script('dashboard');
                     Keep logs for
                 </th>
                 <td>
-                    <select name="data[days]">
-                        <option value="30">30 days</option>
-                        <option value="30">60 days</option>
-                        <option value="30">90 days</option>
+                    <select name="data[log_days]">
+                        <option value="30" <?php echo $log_days == 30 ? 'selected' : ''; ?>>30 days</option>
+                        <option value="60" <?php echo $log_days == 60 ? 'selected' : ''; ?>>60 days</option>
+                        <option value="90" <?php echo $log_days == 90 ? 'selected' : ''; ?>>90 days</option>
                     </select>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Send report
+                </th>
+                <td>
+                    <select name="data[report]">
+                        <option value="0" <?php echo!$report ? 'selected' : ''; ?>>never</option>
+                        <option value="daily" <?php echo $report == 'daily' ? 'selected' : ''; ?>>daily</option>
+                        <option value="weekly" <?php echo $report == 'weekly' ? 'selected' : ''; ?>>weekly</option>
+                    </select>
+
+                    <?php echo gmdate('Y-m-d, h:i:s', wp_next_scheduled('monitor_report')); ?> UTC
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Send alerts
+                </th>
+                <td>
+                    <input type="checkbox" value="1" name="data[alerts]" <?php echo isset($data['alerts']) ? 'checked' : ''; ?>>
                 </td>
             </tr>
         </table>

@@ -20,6 +20,10 @@ Records events like sent email, abilities execution, scheduler triggers. For dev
 * **Scheduler**: records the trigger call top the wp-cron.php script
 * **HTTP**: records the requests to external URLs
 
+= Developers =
+
+This plugin shows old-style code, it's wanted.
+
 == Frequently Asked Questions ==
 
 None, at moment.

@@ -323,9 +323,20 @@ function monitor_get_hook_functions($tag) {
 }
 
 // Daily cleanup process
-function monitor_clean_logs() {
+add_action('monitor_clean_logs', function () {
     // TODO
+});
+
+
+add_action('monitor_report', 'monitor_report');
+
+function monitor_report() {
+    
 }
+
+add_action('monitor_alerts', function () {
+    // TODO
+});
 
 /**
  * Update
