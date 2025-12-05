@@ -12,29 +12,51 @@ if (!$ability) {
 $input_schema = $ability->get_input_schema();
 $properties = $input_schema['properties'];
 
-print_r($properties);
+//print_r($properties);
 ?>
 
 <div class="wrap">
     <h2><?php echo esc_html($ability->get_label()); ?></h2>
+    <?php include __DIR__ . '/nav.php'; ?>
 
-    <h3>Input</h3>
+    <h3>Input Schema</h3>
+    <pre><?php echo wp_json_encode($ability->get_input_schema(), JSON_PRETTY_PRINT); ?></pre>
 
-    <table class="form-table">
-        <?php foreach ($properties as $key => $values) { ?>
-        <tr>
-            <td><?php echo esc_html($key); ?></td>
-            <td><?php echo esc_html($values['type'] ?? '?'); ?></td>
-            <td>
-                <?php
-                if (isset($values['enum'])) {
-                        echo esc_html(implode(', ', $values['enum']));
-                }
-                ?>
-            </td>
-            <td><?php echo esc_html($values['description'] ?? ''); ?></td>
+    <h3>Output Schema</h3>
+    <pre><?php echo wp_json_encode($ability->get_output_schema(), JSON_PRETTY_PRINT); ?></pre>
 
-        </tr>
-        <?php } ?>
+    <h3>Output Schema</h3>
+    <pre><?php echo wp_json_encode($ability->get_meta(), JSON_PRETTY_PRINT); ?></pre>
+    <table class="widefat" style="width: auto;">
+        <thead>
+            <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Item Type</th>
+                <th>Enum</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($properties as $key => $values) { ?>
+                <tr>
+                    <td><?php echo esc_html($key); ?></td>
+                    <td><?php echo esc_html($values['type'] ?? '?'); ?></td>
+                    <td><?php echo esc_html($values['type'] === 'array' ? $values['items']['type'] : ''); ?></td>
+                    <td>
+                        <?php
+                        if ($values['type'] === 'array') {
+                            $enum = $values['items']['enum'] ?? [];
+                        } else {
+                            $enum = $values['enum'] ?? [];
+                        }
+                        echo esc_html(implode(', ', $enum));
+                        ?>
+                    </td>
+                    <td><?php echo esc_html($values['description'] ?? ''); ?></td>
+
+                </tr>
+            <?php } ?>
+        </tbody>
     </table>
 </div>

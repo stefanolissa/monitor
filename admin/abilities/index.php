@@ -45,12 +45,12 @@ class Abilities_List_Table extends WP_List_Table {
 
         // Define columns and sortable columns (if needed).
         $columns = $this->get_columns();
-        $hidden = []; // You can specify columns to hide here.
-        $sortable = []; // You can specify sortable columns here.
+        $hidden = [];
+        $sortable = [];
         $this->_column_headers = [$columns, $hidden, $sortable];
 
-        // This is where you would implement pagination logic.
-        $per_page = 2; // Number of items to display per page.
+        
+        $per_page = 200;
         $current_page = $this->get_pagenum();
         $total_items = count($abilities);
 
