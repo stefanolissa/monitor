@@ -1,0 +1,21 @@
+table.widefat {
+    border: 0;
+}
+
+.column-created {
+    width: 8rem;
+}
+
+.column-context {
+    width: 5rem;
+}
+
+.red {
+    color: red;
+}
+.orange {
+    color: orange;
+}
+.green {
+    color: green;
+}
