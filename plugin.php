@@ -2,7 +2,7 @@
 
 /**
  * Plugin Name: Monitor
- * Description: Records and displays WP events: emails, abilities, scheduler, http, api
+ * Description: Records and displays WP events: abilities, scheduler, http
  * Version: 0.1.5
  * Author: satollo
  * Author URI: https://www.satollo.net
