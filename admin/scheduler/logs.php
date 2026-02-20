@@ -109,14 +109,11 @@ add_thickbox();
 <style>
     <?php include __DIR__ . '/../style.css'; ?>
 
-    .column-type {
-        width: 3rem;
-    }
     .column-ip {
-        width: 4rem;
+        width: 5rem;
     }
-    td ol {
-        margin: 0;
+    .column-filters {
+        width: 3rem;
     }
 </style>
 <div class="wrap">

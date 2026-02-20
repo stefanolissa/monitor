@@ -2,6 +2,10 @@ table.widefat {
     border: 0;
 }
 
+ table.wp-list-table td ol {
+        margin: 0;
+    }
+
 .column-created {
     width: 8rem;
 }

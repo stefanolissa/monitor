@@ -72,17 +72,17 @@ add_filter('plugins_api', function ($res, $action, $args) {
     }
 
     $res = new stdClass();
-    $res->name = 'Mailer';
+    $res->name = 'Monitor';
     $res->slug = 'monitor';
     $res->version = MONITOR_VERSION;
     $res->author = '<a href="https://www.satollo.net">Stefano Lissa</a>';
     $res->homepage = 'https://www.satollo.net/plugins/monitor';
     $res->download_link = 'https://www.satollo.net/repo/monitor/monitor.zip';
 
-    $res->sections = array(
+    $res->sections = [
         'description' => $readme,
         'changelog' => $changelog
-    );
+    ];
 
     $res->banners = [
         'low' => 'https://www.satollo.net/repo/monitor/banner.png',
