@@ -1,6 +1,9 @@
 <?php
+
 defined('ABSPATH') || exit;
-$subpage = $_GET['subpage'] ?? '';
+
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- not relevant
+$subpage = sanitize_key($_GET['subpage'] ?? '');
 
 switch ($subpage) {
     case 'logs':
@@ -11,7 +14,7 @@ switch ($subpage) {
         return;
 }
 
-class Abilities_List_Table extends WP_List_Table {
+class Monitor_List_Table extends WP_List_Table {
 
     public function __construct() {
         parent::__construct([
@@ -21,11 +24,6 @@ class Abilities_List_Table extends WP_List_Table {
         ]);
     }
 
-    /**
-     * Defines the columns for our list table.
-     *
-     * @return array An associative array of column headers.
-     */
     public function get_columns() {
         $columns = [
             'name' => 'Name',
@@ -44,7 +42,6 @@ class Abilities_List_Table extends WP_List_Table {
 
         $abilities = wp_get_abilities();
 
-        // Define columns and sortable columns (if needed).
         $columns = $this->get_columns();
         $hidden = [];
         $sortable = [];
@@ -59,17 +56,13 @@ class Abilities_List_Table extends WP_List_Table {
             'per_page' => $per_page,
         ]);
 
-        // Slice the data for the current page.
         $this->items = array_slice($abilities, (($current_page - 1) * $per_page), $per_page);
     }
 
     /**
-     * Handles the display of a single column's data.
-     * This is the default handler for all columns without a dedicated method.
-     *
-     * @param \WP_Ability $item        A single item from the data array.
-     * @param string $column_name The name of the current column.
-     * @return string The content to display for the column.
+     * @param \WP_Ability $item
+     * @param string $column_name
+     * @return string
      */
     public function column_default($item, $column_name) {
         switch ($column_name) {
@@ -87,15 +80,15 @@ class Abilities_List_Table extends WP_List_Table {
     }
 }
 
-$table = new Abilities_List_Table();
+$table = new Monitor_List_Table();
 $table->prepare_items();
 ?>
 <div class="wrap">
-    <h2>Abilities</h2>
+    <h2><?php esc_html_e('Abilities', 'monitor'); ?></h2>
     <?php include __DIR__ . '/nav.php'; ?>
 
     <p>
-        Abilities are something new available since WP 6.9 and a foundation to integrate AI into WP.
+        Abilities are available since WP 6.9 and a foundation to integrate AI into WP.
     </p>
 
     <?php $table->display(); ?>

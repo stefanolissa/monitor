@@ -1,9 +1,13 @@
 <?php
+
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- not relevant
+
 global $wpdb;
 
 defined('ABSPATH') || exit;
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- not necessary
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     check_admin_referer('monitor-action');
     if (isset($_POST['clear'])) {
         $wpdb->query("truncate {$wpdb->prefix}monitor_rest");
@@ -102,13 +106,13 @@ add_thickbox();
     }
 </style>
 <div class="wrap">
-    <h2>REST Logs</h2>
+    <h2><?php esc_html_e('Logs', 'monitor'); ?></h2>
     <?php include __DIR__ . '/nav.php'; ?>
 
     <form method="post">
         <?php wp_nonce_field('monitor-action'); ?>
-        <button name="clear" class="button button-secondary">Clear</button>
-        <a href="<?= get_rest_url() ?>" class="button button-secondary" target="_blank">See main endpoint</a>
+        <button name="clear" class="button button-secondary"><?php esc_html_e('Clear', 'monitor'); ?></button>
+        <a href="<?php echo esc_attr(get_rest_url()); ?>" class="button button-secondary" target="_blank"><?php esc_html_e('See main endpoint', 'monitor'); ?></a>
     </form>
 
     <?php $table->display(); ?>

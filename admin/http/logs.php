@@ -1,20 +1,30 @@
 <?php
+
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- not relevant
+
 global $wpdb;
 
 defined('ABSPATH') || exit;
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- not necessary
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     check_admin_referer('monitor-action');
-    
+
+    // Positive test
     if (isset($_POST['test'])) {
         wp_remote_get('https://www.satollo.net/');
     }
 
+    // Negative test
     if (isset($_POST['error'])) {
         wp_remote_get('https://www.sato llo.net/');
-    } elseif (isset($_POST['notfound'])) {
+    }
+
+    // Not found test
+    if (isset($_POST['notfound'])) {
         wp_remote_get('https://www.satollo.net/not-existing');
     }
+
     if (isset($_POST['clear'])) {
         $wpdb->query("truncate {$wpdb->prefix}monitor_http");
     }
@@ -115,18 +125,16 @@ add_thickbox();
     }
 </style>
 <div class="wrap">
-    <h2>HTTP Logs</h2>
+    <h2><?php esc_html_e('Logs', 'monitor'); ?></h2>
     <?php include __DIR__ . '/nav.php'; ?>
 
-    <?php if (WP_DEBUG) { ?>
         <form method="post">
             <?php wp_nonce_field('monitor-action'); ?>
-            <button name="test" class="button button-secondary">Test good URL</button>
-            <button name="error" class="button button-secondary">Simulate bad URL</button>
-            <button name="notfound" class="button button-secondary">Simulate not found</button>
-            <button name="clear" class="button button-secondary">Clear</button>
+        <button name="test" class="button button-secondary"><?php esc_html_e('Test good URL', 'monitor'); ?></button>
+        <button name="error" class="button button-secondary"><?php esc_html_e('Simulate bad URL', 'monitor'); ?></button>
+        <button name="notfound" class="button button-secondary"><?php esc_html_e('Simulate not found', 'monitor'); ?></button>
+        <button name="clear" class="button button-secondary"><?php esc_html_e('Clear', 'monitor'); ?></button>
         </form>
-    <?php } ?>
 
     <?php $table->display(); ?>
 

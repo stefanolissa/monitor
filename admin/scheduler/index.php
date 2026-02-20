@@ -1,9 +1,13 @@
 <?php
+
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- not relevant
+
 global $wpdb;
 
 defined('ABSPATH') || exit;
 
-$subpage = $_GET['subpage'] ?? '';
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- not relevant
+$subpage = sanitize_key($_GET['subpage'] ?? '');
 
 switch ($subpage) {
     case 'logs':
@@ -20,13 +24,7 @@ switch ($subpage) {
         return;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    check_admin_referer('monitor-reset');
-    $wpdb->query("truncate {$wpdb->prefix}monitor_scheduler");
-}
-
-// TODO: compute statistics
-$starts = $wpdb->get_results($wpdb->prepare("select UNIX_TIMESTAMP(created) as ts from {$wpdb->prefix}monitor_scheduler WHERE created > DATE_SUB(NOW(), INTERVAL 3 DAY) order by id asc"));
+$starts = $wpdb->get_results("select UNIX_TIMESTAMP(created) as ts from {$wpdb->prefix}monitor_scheduler WHERE created > DATE_SUB(NOW(), INTERVAL 3 DAY) order by id asc");
 $deltas = [];
 $avg = 0;
 $max = 0;
@@ -89,14 +87,10 @@ if (is_array($schedules)) {
     }
 }
 
-// Yes, I know, it's not the right place. I know.
-wp_enqueue_script('monitor-plotly', 'https://cdn.plot.ly/plotly-3.1.0.min.js');
 ?>
-<style>
-<?php include __DIR__ . '/../style.css'; ?>
-</style>
+
 <div class="wrap">
-    <h2>Scheduler</h2>
+    <h2><?php esc_html_e('Scheduler', 'monitor'); ?></h2>
     <?php include __DIR__ . '/nav.php'; ?>
 
     <?php if ($skipped) { ?>
@@ -142,25 +136,25 @@ wp_enqueue_script('monitor-plotly', 'https://cdn.plot.ly/plotly-3.1.0.min.js');
                                         <td>
                                             <?php
                                             if ($avg > $min_interval) {
-                                                echo '<span class="red">', monitor_format_interval($avg), '</span>';
+                                                echo '<span class="red">', esc_html(monitor_format_interval($avg)), '</span>';
                                                 echo '<br><small>Greater than the minimim frequency</small>';
                                             } else {
-                                                echo '<span class="green">', monitor_format_interval($avg), '</span>';
+                                                echo '<span class="green">', esc_html(monitor_format_interval($avg)), '</span>';
                                             }
                                             ?>
                                         </td>
                                     </tr>
                                     <tr>
                                         <th>Maximum delay</th>
-                                        <td><?= monitor_format_interval($max) ?></td>
+                                        <td><?php echo esc_html(monitor_format_interval($max)); ?></td>
                                     </tr>
                                     <tr>
                                         <th>Minimum delay</th>
-                                        <td><?= esc_html($min) ?> seconds</td>
+                                        <td><?php echo esc_html($min); ?> seconds</td>
                                     </tr>
                                     <tr>
                                         <th>Last run</th>
-                                        <td><?= wp_date('Y-m-d H:i:s', $last_run) ?></td>
+                                        <td><?php echo esc_html(wp_date('Y-m-d H:i:s', $last_run)); ?></td>
                                     </tr>
 
                                 </tbody>
@@ -190,26 +184,26 @@ wp_enqueue_script('monitor-plotly', 'https://cdn.plot.ly/plotly-3.1.0.min.js');
                             <table class="widefat" style="width: 100%">
                                 <thead>
                                     <tr>
-                                        <th>Parameter</th>
-                                        <th>Value</th>
+                                        <th><?php esc_html_e('Parameter', 'monitor'); ?></th>
+                                        <th><?php esc_html_e('Value', 'monitor'); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <th>Minimum frequency</th>
-                                        <td><?= monitor_format_interval($min_interval) ?></td>
+                                        <th><?php esc_html_e('Minimum frequency', 'monitor'); ?></th>
+                                        <td><?php echo esc_html(monitor_format_interval($min_interval)); ?></td>
                                     </tr>
                                     <tr>
                                         <th><code>DISABLE_WP_CRON</code></th>
-                                        <td><?= (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) ? '<span class="orange">true</span>' : 'false</span>' ?></td>
+                                        <td><?php echo esc_html((defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) ? 'true' : 'false'); ?></td>
                                     </tr>
                                     <tr>
                                         <th><code>ALTERNATE_WP_CRON</code></th>
-                                        <td><?= (defined('ALTERNATE_WP_CRON') && ALTERNATE_WP_CRON) ? 'true' : 'false' ?></td>
+                                        <td><?php echo esc_html((defined('ALTERNATE_WP_CRON') && ALTERNATE_WP_CRON) ? 'true' : 'false'); ?></td>
                                     </tr>
                                     <tr>
                                         <th><code>WP_CRON_LOCK_TIMEOUT</code></th>
-                                        <td><?= esc_html(WP_CRON_LOCK_TIMEOUT) ?></td>
+                                        <td><?php echo esc_html(WP_CRON_LOCK_TIMEOUT) ?></td>
                                     </tr>
 
                                     <tr>
@@ -218,7 +212,7 @@ wp_enqueue_script('monitor-plotly', 'https://cdn.plot.ly/plotly-3.1.0.min.js');
                                         <td>
                                             <?php
                                             if ($doing_cron) {
-                                                echo '<span class="orange">', monitor_format_interval(time() - (int) $doing_cron), '</span>';
+                                                echo '<span style="color: orange;">', esc_html(monitor_format_interval(time() - (int) $doing_cron)), '</span>';
                                             }
                                             ?>
                                         </td>

@@ -1,7 +1,12 @@
 <?php
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- not relevant
+
+global $wpdb;
+
 defined('ABSPATH') || exit;
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- not necessary
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     check_admin_referer('monitor-action');
 
     if (isset($_POST['test'])) {
@@ -15,25 +20,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-class Emails_List_Table extends WP_List_Table {
+class Monitor_List_Table extends WP_List_Table {
 
-    /**
-     * Constructor for the class.
-     * Sets up the list table properties.
-     */
     public function __construct() {
         parent::__construct([
-            'singular' => 'Email', // Singular name of the listed records.
-            'plural' => 'Emails', // Plural name of the listed records.
-            'ajax' => false, // Does this table support ajax?
+            'singular' => 'Email',
+            'plural' => 'Emails',
+            'ajax' => false,
         ]);
     }
 
-    /**
-     * Defines the columns for our list table.
-     *
-     * @return array An associative array of column headers.
-     */
     public function get_columns() {
         $columns = [
             'created' => 'Created',
@@ -48,21 +44,15 @@ class Emails_List_Table extends WP_List_Table {
         return $columns;
     }
 
-    /**
-     * Prepares the data for the list table.
-     * This is where you would fetch data from a database, file, or API.
-     */
     public function prepare_items() {
         global $wpdb;
 
-        // Define columns and sortable columns (if needed).
         $columns = $this->get_columns();
-        $hidden = []; // You can specify columns to hide here.
-        $sortable = []; // You can specify sortable columns here.
+        $hidden = [];
+        $sortable = [];
         $this->_column_headers = [$columns, $hidden, $sortable];
 
-        // This is where you would implement pagination logic.
-        $per_page = 20; // Number of items to display per page.
+        $per_page = 30;
         $current_page = $this->get_pagenum();
         $total_items = (int) $wpdb->get_var("select count(*) from {$wpdb->prefix}monitor_emails");
 
@@ -71,19 +61,10 @@ class Emails_List_Table extends WP_List_Table {
             'per_page' => $per_page,
         ]);
 
-        // Slice the data for the current page.
         $this->items = $wpdb->get_results($wpdb->prepare("select * from {$wpdb->prefix}monitor_emails order by id desc limit %d offset %d",
                         $per_page, ($current_page - 1) * $per_page));
     }
 
-    /**
-     * Handles the display of a single column's data.
-     * This is the default handler for all columns without a dedicated method.
-     *
-     * @param \WP_Ability $item        A single item from the data array.
-     * @param string $column_name The name of the current column.
-     * @return string The content to display for the column.
-     */
     public function column_default($item, $column_name) {
         switch ($column_name) {
             case 'created':
@@ -111,20 +92,18 @@ class Emails_List_Table extends WP_List_Table {
     }
 }
 
-$table = new Emails_List_Table();
+$table = new Monitor_List_Table();
 $table->prepare_items();
 
 add_thickbox();
 ?>
 <style>
-<?php include __DIR__ . '/../style.css'; ?>
-
     .column-status {
         text-align: center;
         width: 3rem;
     }
 </style>
-<div class="wrap">
+<div class="wrap" id="monitor-emails">
     <h2>Emails</h2>
     <?php include __DIR__ . '/nav.php'; ?>
     <p>

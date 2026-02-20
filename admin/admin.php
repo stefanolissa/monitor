@@ -38,6 +38,14 @@ add_action('init', function () {
         return;
     }
 
+    if (str_starts_with(($_GET['page'] ?? ''), 'monitor_')) {
+        add_action('admin_enqueue_scripts', function () {
+            //wp_enqueue_script('monitor-plotly', 'https://cdn.plot.ly/plotly-3.1.0.min.js');
+            wp_enqueue_script('monitor-plotly', plugin_dir_url(__FILE__) . '/assets/plotly-3.3.0.min.js', [], MONITOR_VERSION);
+            wp_enqueue_style('monitor', plugin_dir_url(__FILE__) . '/style.css', [], MONITOR_VERSION);
+        });
+    }
+
     add_action('admin_menu', function () {
 
         add_menu_page('Monitor', 'Monitor', 'administrator', 'monitor', '', 'dashicons-performance', 6);

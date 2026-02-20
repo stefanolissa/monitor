@@ -1,9 +1,13 @@
 <?php
+
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- not relevant
+
 defined('ABSPATH') || exit;
 
 global $wpdb;
 
-$subpage = $_GET['subpage'] ?? '';
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- not relevant
+$subpage = sanitize_key($_GET['subpage'] ?? '');
 
 switch ($subpage) {
     case 'logs':
@@ -20,14 +24,27 @@ foreach ($per_day as $data) {
     $per_day_y[] = $data->total;
 }
 
-// Yes, I know, it's not the right place. I know.
-wp_enqueue_script('monitor-plotly', 'https://cdn.plot.ly/plotly-3.1.0.min.js');
 ?>
 <div class="wrap">
     <h2>HTTP</h2>
     <?php include __DIR__ . '/nav.php'; ?>
 
-    <p></p>
+    <table class="widefat" style="width: auto">
+        <thead>
+            <tr>
+                <th><?php esc_html_e('Date', 'monitor'); ?></th>
+                <th><?php esc_html_e('Count', 'monitor'); ?></th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($per_day as $data) { ?>
+                <tr>
+                    <td><?php echo esc_html($data->date); ?></td>
+                    <td><?php echo esc_html($data->total); ?></td>
+                </tr>
+            <?php } ?>
+        </tbody>
+    </table>
 
     <div id="graph" style="margin: 2rem 0"></div>
 

@@ -1,0 +1,11 @@
+parameters:
+    level: 1
+    scanDirectories:
+        - ../../WordPress/wordpress
+    bootstrapFiles:
+        - phpstan.inc
+    ignoreErrors:
+        - identifier: requireOnce.fileNotFound
+        - identifier: include.fileNotFound
+    excludePaths:
+        - lib/*

@@ -1,13 +1,16 @@
 <?php
+
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- not relevant
+
 defined('ABSPATH') || exit;
 
 class Monitor_List_Table extends WP_List_Table {
 
     public function __construct() {
         parent::__construct([
-            'singular' => 'Ability calls', // Singular name of the listed records.
-            'plural' => 'Ability call', // Plural name of the listed records.
-            'ajax' => false, // Does this table support ajax?
+            'singular' => 'Ability calls',
+            'plural' => 'Ability call',
+            'ajax' => false,
         ]);
     }
 
@@ -39,7 +42,6 @@ class Monitor_List_Table extends WP_List_Table {
             'per_page' => $per_page,
         ]);
 
-        // Slice the data for the current page.
         $this->items = $wpdb->get_results($wpdb->prepare("select * from {$wpdb->prefix}monitor_abilities order by id desc limit %d offset %d",
                         $per_page, ($current_page - 1) * $per_page));
     }
@@ -70,7 +72,7 @@ $table->prepare_items();
 add_thickbox();
 ?>
 <div class="wrap">
-    <h2>Ability calls</h2>
+    <h2><?php esc_html_e('Logs', 'monitor'); ?></h2>
     <?php include __DIR__ . '/nav.php'; ?>
 
     <?php $table->display(); ?>

@@ -3,7 +3,8 @@ global $wpdb;
 
 defined('ABSPATH') || exit;
 
-$subpage = $_GET['subpage'] ?? '';
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- not relevant
+$subpage = sanitize_key($_GET['subpage'] ?? '');
 
 switch ($subpage) {
     case 'logs':
@@ -26,15 +27,12 @@ foreach ($reg_per_day as $data) {
     $reg_per_day_y[] = $data->total;
 }
 
-// Yes, I know, it's not the right place. I know.
-wp_enqueue_script('monitor-plotly', 'https://cdn.plot.ly/plotly-3.1.0.min.js');
 ?>
 
 <div class="wrap">
     <h2>Users</h2>
     <?php include __DIR__ . '/nav.php'; ?>
     <p>
-        Still nothing here.
     </p>
 
     <div id="graph" style="margin: 2rem 0 0 0"></div>

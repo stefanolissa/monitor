@@ -1,9 +1,11 @@
 <?php
 
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- not relevant
+
 /**
  * Plugin Name: Monitor
  * Description: Records and displays WP events: abilities, scheduler, http
- * Version: 0.1.5
+ * Version: 1.0.0
  * Author: satollo
  * Author URI: https://www.satollo.net
  * License: GPL-2.0+
@@ -14,9 +16,10 @@
  * Plugin URI: https://www.satollo.net/plugins/monitor
  * Update URI: satollo-monitor
  */
+
 defined('ABSPATH') || exit;
 
-define('MONITOR_VERSION', '0.1.5');
+define('MONITOR_VERSION', '1.0.0');
 
 /** @var wpdb $wpdb */
 register_deactivation_hook(__FILE__, function () {
@@ -32,6 +35,11 @@ if (is_admin()) {
     require_once __DIR__ . '/admin/admin.php';
 }
 
+/**
+ * Return the context of the current event.
+ *
+ * @return string
+ */
 function monitor_get_context() {
     $context = 'frontend';
     if (defined('WP_CLI') && WP_CLI) {
@@ -139,13 +147,8 @@ if (!empty($monitor_settings['abilities'])) {
  * Scheduler monitoring
  */
 if (!empty($monitor_settings['scheduler'])) {
-    $monitor_scheduler_log_id = 0;
-    $monitor_scheduler_log_jobs = [];
-
-    // Used by the dummy job injection
-    add_action('monitor_scheduler_test', function () {
-        // Do nothing
-    });
+    $monitor_scheduler_log_id = 0; // The current log line to be updated
+    $monitor_scheduler_log_jobs = []; // Records the executed jobs
 
     if (defined('DOING_CRON') && DOING_CRON) {
         $context = monitor_get_context();
@@ -161,14 +164,12 @@ if (!empty($monitor_settings['scheduler'])) {
             }
         }
 
-//        $wpdb->insert($wpdb->prefix . 'monitor_scheduler', ['type' => 'start', 'ip' => $ip,
-//            'context' => $context, 'text' => 'Started: ' . $jobs . ' jobs to be executed', 'ready_jobs' => serialize($ready_jobs)]);
-
         $wpdb->insert($wpdb->prefix . 'monitor_scheduler', ['ip' => $ip,
             'context' => $context, 'ready_jobs' => serialize($ready_jobs), 'executed_jobs' => serialize([])]);
 
         $monitor_scheduler_log_id = $wpdb->insert_id;
 
+        // Capture all the relevant active filters
         add_action('wp_loaded', function () {
             global $wpdb, $monitor_scheduler_log_id;
             $hooks = [
@@ -192,12 +193,9 @@ if (!empty($monitor_settings['scheduler'])) {
         add_filter('pre_unschedule_event', function ($pre, $timestamp, $hook, $args, $wp_error) {
             global $wpdb, $monitor_scheduler_log_jobs, $monitor_scheduler_log_id;
 
-            // TODO: add delay as db field
             $delay = time() - $timestamp;
-            //$context = '';
             $monitor_scheduler_log_jobs[] = ['hook' => $hook, 'delay' => $delay];
             $wpdb->update($wpdb->prefix . 'monitor_scheduler', ['executed_jobs' => serialize($monitor_scheduler_log_jobs)], ['id' => $monitor_scheduler_log_id]);
-            //$wpdb->insert($wpdb->prefix . 'monitor_scheduler', ['type' => 'job', 'ip' => '', 'text' => 'Executing "' . $hook . '" with a delay of ' . $delay . ' seconds']);
 
             return $pre;
         }, 0, 5);
@@ -217,7 +215,6 @@ if (!empty($monitor_settings['scheduler'])) {
         }, 9999);
     }
 }
-
 
 if (!empty($monitor_settings['http'])) {
     $monitor_http_log_id = 0;
@@ -301,6 +298,13 @@ if (!empty($monitor_settings['rest'])) {
     }, 99, 3);
 }
 
+/**
+ * Returns the list of functions attached to a specific hook.
+ *
+ * @global array $wp_filter
+ * @param string $tag
+ * @return array
+ */
 function monitor_get_hook_functions($tag) {
     global $wp_filter;
     if (!isset($wp_filter[$tag])) {
@@ -348,12 +352,13 @@ function monitor_clean_logs() {
     $settings = get_option('monitor');
     $days = (int) ($settings['log_days'] ?? 30);
     $days = max($days, 1);
-    $wpdb->query("delete from `{$wpdb->prefix}monitor_abilities` where created < date_sub(now(), interval $days day)");
-    $wpdb->query("delete from `{$wpdb->prefix}monitor_emails` where created < date_sub(now(), interval $days day)");
-    $wpdb->query("delete from `{$wpdb->prefix}monitor_schduler` where created < date_sub(now(), interval $days day)");
-    $wpdb->query("delete from `{$wpdb->prefix}monitor_http` where created < date_sub(now(), interval $days day)");
+    $wpdb->query($wpdb->prepare("delete from `{$wpdb->prefix}monitor_abilities` where created < date_sub(now(), interval %d day)", $days));
+    $wpdb->query($wpdb->prepare("delete from `{$wpdb->prefix}monitor_emails` where created < date_sub(now(), interval %d day)", $days));
+    $wpdb->query($wpdb->prepare("delete from `{$wpdb->prefix}monitor_scheduler` where created < date_sub(now(), interval %d day)", $days));
+    $wpdb->query($wpdb->prepare("delete from `{$wpdb->prefix}monitor_http` where created < date_sub(now(), interval %d day)", $days));
 }
 
-if (is_admin() || defined('DOING_CRON') && DOING_CRON) {
+// Only for alpha/beta versions
+if (is_admin() || defined('DOING_CRON') && DOING_CRON && file_exists(__DIR__ . '/includes/repo.php')) {
     require_once __DIR__ . '/includes/repo.php';
 }

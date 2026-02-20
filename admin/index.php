@@ -1,19 +1,14 @@
 <?php
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+defined('ABSPATH') || exit;
+
+// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- not necessary
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     check_admin_referer('monitor-save');
 
     if (isset($_POST['save'])) {
         $data = wp_kses_post_deep(wp_unslash($_POST['data']));
 
-        // TODO: cleanup the options
         update_option('monitor_settings', $data);
-
-        // Report
-//        wp_unschedule_hook('monitor_report');
-//        if (!empty($data['report'])) {
-//            $when = $data['report'] == 'weekly' ? WEEK_IN_SECONDS : DAY_IN_SECONDS;
-//            wp_schedule_event(time() + $when, $data['report'], 'monitor_report');
-//        }
     }
 
     if (isset($_POST['clean'])) {
@@ -48,7 +43,7 @@ $alerts = $data['alerts'] ?? '';
         <table class="form-table" role="presentation">
             <tr>
                 <th>
-                    Monitor emails
+                    <?php esc_html_e('Monitor emails', 'monitor'); ?>
                 </th>
                 <td>
                     <input type="checkbox" value="1" name="data[emails]" <?= isset($data['emails']) ? 'checked' : ''; ?>>
@@ -56,26 +51,26 @@ $alerts = $data['alerts'] ?? '';
             </tr>
             <tr>
                 <th>
-                    Monitor abilities
+                    <?php esc_html_e('Monitor the abilities', 'monitor'); ?>
                 </th>
                 <td>
-                    <input type="checkbox" value="1" name="data[abilities]" <?= isset($data['abilities']) ? 'checked' : ''; ?>>
+                    <input type="checkbox" value="1" name="data[abilities]" <?php echo isset($data['abilities']) ? 'checked' : ''; ?>>
                 </td>
             </tr>
             <tr>
                 <th>
-                    Monitor scheduler
+                    <?php esc_html_e('Monitor the scheduler', 'monitor'); ?>
                 </th>
                 <td>
-                    <input type="checkbox" value="1" name="data[scheduler]" <?= isset($data['scheduler']) ? 'checked' : ''; ?>>
+                    <input type="checkbox" value="1" name="data[scheduler]" <?php echo isset($data['scheduler']) ? 'checked' : ''; ?>>
                 </td>
             </tr>
             <tr>
                 <th>
-                    Monitor HTTP
+                    <?php esc_html_e('Monitor the HTTP calls', 'monitor'); ?>
                 </th>
                 <td>
-                    <input type="checkbox" value="1" name="data[http]" <?= isset($data['http']) ? 'checked' : ''; ?>>
+                    <input type="checkbox" value="1" name="data[http]" <?php echo isset($data['http']) ? 'checked' : ''; ?>>
                     <p class="description">
                         HTTP connections made using the native PHP functions (curl, file_get_contents, sockets, ...) are not monitored.
                     </p>
@@ -85,78 +80,58 @@ $alerts = $data['alerts'] ?? '';
 
             <tr>
                 <th>
-                    Include the wp-cron.php autocall
+                    <?php esc_html_e('Include the wp-cron.php autocall', 'monitor'); ?>
                 </th>
                 <td>
-                    <input type="checkbox" value="1" name="data[http_wpcron]" <?= isset($data['http_wpcron']) ? 'checked' : ''; ?>>
+                    <input type="checkbox" value="1" name="data[http_wpcron]" <?php echo isset($data['http_wpcron']) ? 'checked' : ''; ?>>
                     <p class="description">
-                        WP makes HTTP calls to its <code>wp-cron.php</code> script to keep the internal scehduler active, you may want or not to log them.
+                        WP makes HTTP calls to its <code>wp-cron.php</code> script to keep the internal scehduler active,
+                        you may want or not to log them.
                     </p>
                 </td>
             </tr>
 
             <tr>
                 <th>
-                    Monitor REST API
+                    <?php esc_html_e('Monitor the REST API calls', 'monitor'); ?>
                 </th>
                 <td>
-                    <input type="checkbox" value="1" name="data[rest]" <?= isset($data['rest']) ? 'checked' : ''; ?>>
+                    <input type="checkbox" value="1" name="data[rest]" <?php echo isset($data['rest']) ? 'checked' : ''; ?>>
                     <p class="description">
-
                     </p>
                 </td>
             </tr>
 
             <tr>
                 <th>
+                    <?php esc_html_e('Include the wp/v2 calls', 'monitor'); ?>
                     Include the wp/v2 calls
                 </th>
                 <td>
-                    <input type="checkbox" value="1" name="data[rest_wpv2]" <?= isset($data['rest_wpv2']) ? 'checked' : ''; ?>>
+                    <input type="checkbox" value="1" name="data[rest_wpv2]" <?php echo isset($data['rest_wpv2']) ? 'checked' : ''; ?>>
                     <p class="description">
-                        Usually they're a lot and generated by Gutenberg, for example
+                        Usually they're a lot and generated by Gutenberg, for example.
                     </p>
                 </td>
             </tr>
             <tr>
                 <th>
-                    Keep logs for
+                    <?php esc_html_e('Retention', 'monitor'); ?>
                 </th>
                 <td>
                     <select name="data[log_days]">
-                        <option value="15" <?= $log_days == 15 ? 'selected' : ''; ?>>15 days</option>
-                        <option value="30" <?= $log_days == 30 ? 'selected' : ''; ?>>30 days</option>
-                        <option value="60" <?= $log_days == 60 ? 'selected' : ''; ?>>60 days</option>
-                        <option value="90" <?= $log_days == 90 ? 'selected' : ''; ?>>90 days</option>
+                        <option value="15" <?php echo $log_days == 15 ? 'selected' : ''; ?>>15</option>
+                        <option value="30" <?php echo $log_days == 30 ? 'selected' : ''; ?>>30</option>
+                        <option value="60" <?php echo $log_days == 60 ? 'selected' : ''; ?>>60</option>
+                        <option value="90" <?php echo $log_days == 90 ? 'selected' : ''; ?>>90</option>
                     </select>
+                    <?php esc_html_e('days', 'monitor'); ?>
+                    <button class="button button-secondary" name="clean"><?php esc_html_e('Clean now', 'monitor'); ?></button>
+                </td>
+            </tr>
 
-                    <button class="button button-secondary" name="clean">Run clean now</button>
-                </td>
-            </tr>
-            <tr>
-                <th>
-                    Send report
-                </th>
-                <td>
-                    <select name="data[report]">
-                        <option value="0" <?= !$report ? 'selected' : ''; ?>>never</option>
-                        <option value="daily" <?= $report == 'daily' ? 'selected' : ''; ?>>daily</option>
-                        <option value="weekly" <?= $report == 'weekly' ? 'selected' : ''; ?>>weekly</option>
-                    </select>
-
-                    <?php echo gmdate('Y-m-d, h:i:s', wp_next_scheduled('monitor_report')); ?> UTC
-                </td>
-            </tr>
-            <tr>
-                <th>
-                    Send alerts
-                </th>
-                <td>
-                    <input type="checkbox" value="1" name="data[alerts]" <?= isset($data['alerts']) ? 'checked' : ''; ?>>
-                </td>
-            </tr>
         </table>
-        <button class="button button-primary" name="save">Save</button>
+        <button class="button button-primary" name="save"><?php esc_html_e('Save', 'monitor'); ?></button>
     </form>
 
     <h3>Debug</h3>

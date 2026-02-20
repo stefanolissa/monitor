@@ -50,8 +50,6 @@ foreach ($sent_per_day as $data) {
 
 $avg_duration = $wpdb->get_var("select avg(duration) from {$wpdb->prefix}satollo_monitor_emails");
 
-// Yes, I know, it's not the right place. I know.
-wp_enqueue_script('monitor-plotly', 'https://cdn.plot.ly/plotly-3.1.0.min.js');
 ?>
 <style>
     <?php include __DIR__ . '/../style.css'; ?>

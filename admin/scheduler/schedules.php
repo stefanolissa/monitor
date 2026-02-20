@@ -7,7 +7,7 @@ if (!is_array($schedules)) {
 }
 ?>
 <div class="wrap">
-    <h2>Recurring schedules</h2>
+    <h2><?php esc_html_e('Recurring schedules', 'monitor'); ?></h2>
     <?php include __DIR__ . '/nav.php'; ?>
 
     <?php if (count($schedules) === 0) { ?>
@@ -23,17 +23,17 @@ if (!is_array($schedules)) {
     <table class="widefat" style="width: auto">
         <thead>
             <tr>
-                <th>Name</th>
-                <th>Key</th>
-                <th>Interval</th>
+                <th><?php esc_html_e('Name', 'monitor'); ?></th>
+                <th><?php esc_html_e('Key', 'monitor'); ?></th>
+                <th><?php esc_html_e('Interval', 'monitor'); ?></th>
             </tr>
         </thead>
         <tbody>
             <?php foreach ($schedules as $key => $data) { ?>
                 <tr>
-                    <td><?= esc_html($data['display']); ?></td>
-                    <td><?= esc_html($key); ?></td>
-                    <td><?= monitor_format_interval($data['interval']); ?> </td>
+                    <td><?php echo esc_html($data['display']); ?></td>
+                    <td><?php echo esc_html($key); ?></td>
+                    <td><?php echo esc_html(monitor_format_interval($data['interval'])); ?> </td>
                 </tr>
             <?php } ?>
         </tbody>

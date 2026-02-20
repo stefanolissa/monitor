@@ -1,9 +1,13 @@
 <?php
+
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- not relevant
+
 global $wpdb;
 
 defined('ABSPATH') || exit;
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- not necessary
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     check_admin_referer('monitor-action');
     if (isset($_POST['clear'])) {
         $wpdb->query("truncate {$wpdb->prefix}monitor_scheduler");
@@ -21,17 +25,15 @@ class Monitor_List_Table extends WP_List_Table {
 
     public function __construct() {
         parent::__construct([
-            'singular' => 'Activation', // Singular name of the listed records.
-            'plural' => 'Activations', // Plural name of the listed records.
-            'ajax' => false, // Does this table support ajax?
+            'singular' => __('Activation', 'monitor'),
+            'plural' => __('Activations', 'monitor'),
+            'ajax' => false,
         ]);
     }
 
     public function get_columns() {
         $columns = [
             'created' => 'Created',
-//            'type' => 'Type',
-//            'text' => 'Text',
             'ip' => 'IP',
             'ready_jobs' => 'Ready jobs',
             'executed_jobs' => 'Executed jobs',
@@ -43,14 +45,12 @@ class Monitor_List_Table extends WP_List_Table {
     public function prepare_items() {
         global $wpdb;
 
-        // Define columns and sortable columns (if needed).
         $columns = $this->get_columns();
-        $hidden = []; // You can specify columns to hide here.
-        $sortable = []; // You can specify sortable columns here.
+        $hidden = [];
+        $sortable = [];
         $this->_column_headers = [$columns, $hidden, $sortable];
 
-        // This is where you would implement pagination logic.
-        $per_page = 50; // Number of items to display per page.
+        $per_page = 50;
         $current_page = $this->get_pagenum();
         $total_items = (int) $wpdb->get_var("select count(*) from {$wpdb->prefix}monitor_scheduler");
 
@@ -59,7 +59,6 @@ class Monitor_List_Table extends WP_List_Table {
             'per_page' => $per_page,
         ]);
 
-        // Slice the data for the current page.
         $this->items = $wpdb->get_results($wpdb->prepare("select * from {$wpdb->prefix}monitor_scheduler order by id desc limit %d offset %d",
                         $per_page, ($current_page - 1) * $per_page));
     }
@@ -68,10 +67,6 @@ class Monitor_List_Table extends WP_List_Table {
         switch ($column_name) {
             case 'created':
                 return esc_html($item->created);
-//            case 'text':
-//                return esc_html($item->text);
-//            case 'type':
-//                return esc_html($item->type);
             case 'ip':
                 return esc_html($item->ip);
             case 'ready_jobs':
@@ -106,24 +101,14 @@ $table->prepare_items();
 
 add_thickbox();
 ?>
-<style>
-    <?php include __DIR__ . '/../style.css'; ?>
-
-    .column-ip {
-        width: 5rem;
-    }
-    .column-filters {
-        width: 3rem;
-    }
-</style>
 <div class="wrap">
-    <h2>Scheduler logs</h2>
+    <h2><?php esc_html_e('Logs', 'monitor'); ?></h2>
     <?php include __DIR__ . '/nav.php'; ?>
 
     <form method="post">
         <?php wp_nonce_field('monitor-action'); ?>
-        <button name="clear" class="button button-secondary">Clear</button>
-        <button name="add" class="button button-secondary">Add and execute job</button>
+        <button name="clear" class="button button-secondary"><?php esc_html_e('Clear', 'monitor'); ?></button>
+        <button name="add" class="button button-secondary"><?php esc_html_e('Add and execute a job', 'monitor'); ?></button>
 
     </form>
     <?php $table->display(); ?>
