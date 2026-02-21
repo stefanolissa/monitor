@@ -3,6 +3,7 @@
 ## 0.1.7
 - Fixed the users section
 - Added test buttons on email logging
+- Fixed the abilities logs page
 
 ## 0.1.6
 - Added message on monitoring not active

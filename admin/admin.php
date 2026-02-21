@@ -13,11 +13,13 @@ if (MONITOR_VERSION !== $monitor_version) {
 
 function monitor_format_interval($delta) {
 
+    // To avoid warnings
+    $delta = (float) $delta;
 
     $seconds = $delta % MINUTE_IN_SECONDS;
-    $minutes = intdiv($delta % HOUR_IN_SECONDS, MINUTE_IN_SECONDS);
-    $hours = intdiv($delta % DAY_IN_SECONDS, HOUR_IN_SECONDS);
-    $days = intdiv($delta, DAY_IN_SECONDS);
+    $minutes = floor($delta % HOUR_IN_SECONDS / MINUTE_IN_SECONDS);
+    $hours = floor($delta % DAY_IN_SECONDS / HOUR_IN_SECONDS);
+    $days = floor($delta / DAY_IN_SECONDS);
     return ($days ? $days . ' days, ' : '')
             . ($days || $hours ? $hours . ' hours, ' : '')
             . ($days || $hours || $minutes ? $minutes . ' minutes, ' : '')

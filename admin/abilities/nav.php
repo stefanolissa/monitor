@@ -10,6 +10,7 @@ if (empty($monitor_settings['abilities'])) {
 }
 ?>
 <p>
-    <a href="?page=monitor_abilities"><?php esc_html_e('List', 'monitor'); ?></a>
+    <a href="?page=monitor_abilities"><?php esc_html_e('Overview', 'monitor'); ?></a>
+    | <a href="?page=monitor_abilities&subpage=list"><?php esc_html_e('List', 'monitor'); ?></a>
     | <a href="?page=monitor_abilities&subpage=logs"><?php esc_html_e('Logs', 'monitor'); ?></a>
 </p>

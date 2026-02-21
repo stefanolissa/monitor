@@ -296,7 +296,7 @@ if (is_array($schedules)) {
 
 //        var data2 = [{
 //                //x: [1, 2, 3, 4, 5],
-//                y: <?php echo json_encode($deltas_moving); ?>
+//                y: <?php //echo json_encode($deltas_moving); ?>
 //            }];
 //
 //        Plotly.newPlot('moving-avg', data2, layout);

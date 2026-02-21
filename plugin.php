@@ -52,6 +52,8 @@ function monitor_get_context() {
         $context = 'rest';
     } elseif (is_admin()) {
         $context = 'backend';
+    } elseif (!isset($_SERVER['REQUEST_METHOD'])) {
+        $context = 'php';
     }
     return $context;
 }
