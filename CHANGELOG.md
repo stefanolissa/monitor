@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.7
+- Fixed the users section
+- Added test buttons on email logging
+
+## 0.1.6
+- Added message on monitoring not active
+- Added tabular view on HTTP and REST overview
+- Fixed error on log clean process
+- Added clean buttons on logs pages
+
 ## 0.1.5
 - Fixed name on meta data
 - Reworked the scheduler monitoring

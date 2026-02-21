@@ -1,5 +1,4 @@
 <?php
-
 // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- not relevant
 
 defined('ABSPATH') || exit;
@@ -23,28 +22,11 @@ foreach ($per_day as $data) {
     $per_day_x[] = $data->date;
     $per_day_y[] = $data->total;
 }
-
 ?>
 <div class="wrap">
     <h2>HTTP</h2>
     <?php include __DIR__ . '/nav.php'; ?>
 
-    <table class="widefat" style="width: auto">
-        <thead>
-            <tr>
-                <th><?php esc_html_e('Date', 'monitor'); ?></th>
-                <th><?php esc_html_e('Count', 'monitor'); ?></th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($per_day as $data) { ?>
-                <tr>
-                    <td><?php echo esc_html($data->date); ?></td>
-                    <td><?php echo esc_html($data->total); ?></td>
-                </tr>
-            <?php } ?>
-        </tbody>
-    </table>
 
     <div id="graph" style="margin: 2rem 0"></div>
 
@@ -65,5 +47,22 @@ foreach ($per_day as $data) {
             Plotly.newPlot('graph', data, layout);
         });
     </script>
+
+    <table class="widefat" style="width: auto">
+        <thead>
+            <tr>
+                <th><?php esc_html_e('Date', 'monitor'); ?></th>
+                <th><?php esc_html_e('Count', 'monitor'); ?></th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($per_day as $data) { ?>
+                <tr>
+                    <td><?php echo esc_html($data->date); ?></td>
+                    <td><?php echo esc_html($data->total); ?></td>
+                </tr>
+            <?php } ?>
+        </tbody>
+    </table>
 
 </div>

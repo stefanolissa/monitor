@@ -58,7 +58,7 @@ $avg_duration = $wpdb->get_var("select avg(duration) from {$wpdb->prefix}satollo
     <h2>Emails</h2>
     <?php include __DIR__ . '/nav.php'; ?>
 
-    <p>With not enough data, graphs could be broken, just wait some time...</p>
+    <p>For email logging with actions (resend, ...) conside the WP Mail Logging plugin.</p>
 
     <div id="dashboard-widgets-wrap">
         <div id="dashboard-widgets" class="metabox-holder">

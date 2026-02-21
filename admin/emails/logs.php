@@ -106,18 +106,15 @@ add_thickbox();
 <div class="wrap" id="monitor-emails">
     <h2>Emails</h2>
     <?php include __DIR__ . '/nav.php'; ?>
-    <p>
-        Consider the plugin WP Mail Logging if you need a serious logging of sent emails.
-    </p>
 
-    <?php if (true || WP_DEBUG) { ?>
-        <form method="post">
-            <?php wp_nonce_field('monitor-action'); ?>
-            <button name="test" class="button button-secondary">Send test email</button>
-            <button name="test_bad" class="button button-secondary">Test bad address</button>
-            <button name="clear" class="button button-secondary">Clear</button>
-        </form>
-    <?php } ?>
+    <p>For email logging with actions (resend, ...) conside the WP Mail Logging plugin.</p>
+
+    <form method="post">
+        <?php wp_nonce_field('monitor-action'); ?>
+        <button name="test" class="button button-secondary">Send test email</button>
+        <button name="test_bad" class="button button-secondary">Test bad address</button>
+        <button name="clear" class="button button-secondary">Clear</button>
+    </form>
 
     <?php $table->display(); ?>
 </div>
