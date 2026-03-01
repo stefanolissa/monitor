@@ -102,6 +102,15 @@ add_thickbox();
         text-align: center;
         width: 3rem;
     }
+    .column-text {
+        width: 25rem;
+    }
+    .column-filters {
+        width: 6rem;
+    }
+    .column-duration {
+        width: 5rem;
+    }
 </style>
 <div class="wrap" id="monitor-emails">
     <h2>Emails</h2>

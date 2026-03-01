@@ -5,7 +5,7 @@
 /**
  * Plugin Name: Monitor
  * Description: Records and displays WP events: abilities, scheduler, http, REST API, emails, ...
- * Version: 0.1.7
+ * Version: 0.1.8
  * Author: satollo
  * Author URI: https://www.satollo.net
  * License: GPL-2.0+
@@ -16,10 +16,9 @@
  * Plugin URI: https://www.satollo.net/plugins/monitor
  * Update URI: satollo-monitor
  */
-
 defined('ABSPATH') || exit;
 
-define('MONITOR_VERSION', '0.1.7');
+define('MONITOR_VERSION', '0.1.8');
 
 /** @var wpdb $wpdb */
 register_deactivation_hook(__FILE__, function () {
@@ -98,9 +97,13 @@ if (!empty($monitor_settings['emails'])) {
     }, 0);
 
     add_action('wp_mail_failed', function ($wp_error) {
-        global $wpdb, $monitor_emails_log_id, $monitor_emails_log_start;
+        /** @var \PHPMailer\PHPMailer\PHPMailer $phpmailer */
+        /** @var WP_Error $wp_error */
+        global $wpdb, $monitor_emails_log_id, $monitor_emails_log_start, $phpmailer;
+        // The error information inside phpmailer is far more accurate, this is a "bug" oh phpmailer not
+        // reporting the whole error message inside the exception
         $wpdb->update($wpdb->prefix . 'monitor_emails',
-                ['duration' => microtime(true) - $monitor_emails_log_start, 'status' => 1, 'text' => $wp_error->get_error_message()],
+                ['duration' => microtime(true) - $monitor_emails_log_start, 'status' => 1, 'text' => $phpmailer ? $phpmailer->ErrorInfo : $wp_error->get_error_message()],
                 ['id' => $monitor_emails_log_id]);
         $monitor_emails_log_id = 0;
     }, 0);

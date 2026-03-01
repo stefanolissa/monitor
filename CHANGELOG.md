@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.8
+- Improved error reporting for emails
+
 ## 0.1.7
 - Fixed the users section
 - Added test buttons on email logging

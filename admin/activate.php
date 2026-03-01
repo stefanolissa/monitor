@@ -40,7 +40,7 @@ $sql = "CREATE TABLE `" . $wpdb->prefix . "monitor_emails` (
             `context` varchar(50) NOT NULL DEFAULT '',
             `filters` longtext,
             `duration` double default 0,
-            `text` varchar(250) NOT NULL DEFAULT '',
+            `text` text,
             PRIMARY KEY (`id`)
             ) $charset_collate;";
 
