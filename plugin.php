@@ -5,8 +5,8 @@
 /**
  * Plugin Name: Monitor
  * Description: Records and displays WP events: abilities, scheduler, http, REST API, emails, ...
- * Version: 0.1.8
- * Author: satollo
+ * Version: 0.1.9
+ * Author: Stefano Lissa
  * Author URI: https://www.satollo.net
  * License: GPL-2.0+
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
@@ -18,7 +18,7 @@
  */
 defined('ABSPATH') || exit;
 
-define('MONITOR_VERSION', '0.1.8');
+define('MONITOR_VERSION', '0.1.9');
 
 /** @var wpdb $wpdb */
 register_deactivation_hook(__FILE__, function () {
@@ -89,21 +89,30 @@ if (!empty($monitor_settings['emails'])) {
     }, 9999);
 
     add_action('wp_mail_succeeded', function () {
-        global $wpdb, $monitor_emails_log_id, $monitor_emails_log_start;
+        global $wpdb, $monitor_emails_log_id, $monitor_emails_log_start, $phpmailer;
+
+        /** @var \PHPMailer\PHPMailer\PHPMailer $phpmailer */
         $wpdb->update($wpdb->prefix . 'monitor_emails',
-                ['duration' => microtime(true) - $monitor_emails_log_start, 'status' => 0],
+                ['duration' => microtime(true) - $monitor_emails_log_start, 'status' => 0, 'host' => $phpmailer ? $phpmailer->Host ?? '' : ''],
                 ['id' => $monitor_emails_log_id]);
         $monitor_emails_log_id = 0;
     }, 0);
 
     add_action('wp_mail_failed', function ($wp_error) {
+
+        global $wpdb, $monitor_emails_log_id, $monitor_emails_log_start, $phpmailer;
+
         /** @var \PHPMailer\PHPMailer\PHPMailer $phpmailer */
         /** @var WP_Error $wp_error */
-        global $wpdb, $monitor_emails_log_id, $monitor_emails_log_start, $phpmailer;
         // The error information inside phpmailer is far more accurate, this is a "bug" oh phpmailer not
         // reporting the whole error message inside the exception
         $wpdb->update($wpdb->prefix . 'monitor_emails',
-                ['duration' => microtime(true) - $monitor_emails_log_start, 'status' => 1, 'text' => $phpmailer ? $phpmailer->ErrorInfo : $wp_error->get_error_message()],
+                [
+                    'duration' => microtime(true) - $monitor_emails_log_start,
+                    'status' => 1,
+                    'text' => $phpmailer ? $phpmailer->ErrorInfo : $wp_error->get_error_message(),
+                    'host' => $phpmailer ? $phpmailer->Host ?? '' : ''
+                ],
                 ['id' => $monitor_emails_log_id]);
         $monitor_emails_log_id = 0;
     }, 0);

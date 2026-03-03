@@ -38,6 +38,7 @@ $sql = "CREATE TABLE `" . $wpdb->prefix . "monitor_emails` (
             `to` varchar(200) NOT NULL DEFAULT '',
             `subject` varchar(200) NOT NULL DEFAULT '',
             `context` varchar(50) NOT NULL DEFAULT '',
+            `host` varchar(255) NOT NULL DEFAULT '',
             `filters` longtext,
             `duration` double default 0,
             `text` text,

@@ -37,6 +37,7 @@ class Monitor_List_Table extends WP_List_Table {
             'subject' => 'Subject',
             'to' => 'To',
             'context' => 'Context',
+            'host' => 'Host',
             'duration' => 'Duration (s)',
             'text' => 'Note',
             'filters' => 'Filters'
@@ -79,6 +80,8 @@ class Monitor_List_Table extends WP_List_Table {
                 return esc_html($item->context);
             case 'duration':
                 return round($item->duration, 3);
+                case 'host':
+                return esc_html($item->host);
             case 'text':
                 return esc_html($item->text);
             case 'filters':

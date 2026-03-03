@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.9
+- Added the hosts used if the siote is connected to an SMTP
+
 ## 0.1.8
 - Improved error reporting for emails
 

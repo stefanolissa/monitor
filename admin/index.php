@@ -27,6 +27,15 @@ $alerts = $data['alerts'] ?? '';
 <div class="wrap">
     <h2>Monitor</h2>
 
+    <?php if (is_plugin_active('satollo-monitor/plugin.php')) { ?>
+        <div class="notice notice-error">
+            <p>
+                The Satollo Monitor plugin is active, you must deactivate it, or you're going to record all events twice.
+                Monitor contains a superset of features. 
+            </p>
+        </div>
+    <?php } ?>
+
     <p>
         Monitor keeps an eye on WP events (emails, background tasks, ...) providing
         statistics and logs. If you have any specific need, write me at stefano@satollo.net.
