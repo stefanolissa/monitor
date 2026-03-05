@@ -5,7 +5,7 @@
 /**
  * Plugin Name: Monitor
  * Description: Records and displays WP events: abilities, scheduler, http, REST API, emails, ...
- * Version: 0.1.9
+ * Version: 0.2.0
  * Author: Stefano Lissa
  * Author URI: https://www.satollo.net
  * License: GPL-2.0+
@@ -18,7 +18,7 @@
  */
 defined('ABSPATH') || exit;
 
-define('MONITOR_VERSION', '0.1.9');
+define('MONITOR_VERSION', '0.2.0');
 
 /** @var wpdb $wpdb */
 register_deactivation_hook(__FILE__, function () {
