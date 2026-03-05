@@ -101,8 +101,8 @@ $table->prepare_items();
 
 add_thickbox();
 ?>
+<?php include __DIR__ . '/../menu.php'; ?>
 <div class="wrap">
-    <h2><?php esc_html_e('Logs', 'monitor'); ?></h2>
     <?php include __DIR__ . '/nav.php'; ?>
 
     <form method="post">

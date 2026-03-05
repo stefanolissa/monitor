@@ -71,8 +71,8 @@ class Monitor_List_Table extends WP_List_Table {
 $table = new Monitor_List_Table();
 $table->prepare_items();
 ?>
+<?php include __DIR__ . '/../menu.php'; ?>
 <div class="wrap">
-    <h2><?php esc_html_e('Abilities', 'monitor'); ?></h2>
     <?php include __DIR__ . '/nav.php'; ?>
 
     <p>

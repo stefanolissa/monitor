@@ -23,11 +23,10 @@ foreach ($per_day as $data) {
     $per_day_y[] = $data->total;
 }
 ?>
+<?php include __DIR__ . '/../menu.php'; ?>
 <div class="wrap">
-    <h2>REST</h2>
-<?php include __DIR__ . '/nav.php'; ?>
 
-
+    <?php include __DIR__ . '/nav.php'; ?>
 
     <div id="graph" style="margin: 2rem 0"></div>
 
@@ -57,12 +56,12 @@ foreach ($per_day as $data) {
             </tr>
         </thead>
         <tbody>
-<?php foreach ($per_day as $data) { ?>
+            <?php foreach ($per_day as $data) { ?>
                 <tr>
                     <td><?php echo esc_html($data->date); ?></td>
                     <td><?php echo esc_html($data->total); ?></td>
                 </tr>
-<?php } ?>
+            <?php } ?>
         </tbody>
     </table>
 

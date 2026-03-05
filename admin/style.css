@@ -1,10 +1,47 @@
+/* TOP MENU */
+
+#monitor-menu {
+    margin-left: -20px;
+    background-color: #3B2D9B;
+    padding: 1rem 20px;
+    display: flex;
+    xjustify-content: space-between;
+    align-items: center;
+}
+
+#monitor-menu-title {
+    font-size: 1.2rem;
+    color: white;
+    margin-right: 2rem;
+}
+
+#monitor-menu-nav ul {
+    margin: 0;
+}
+
+#monitor-menu-nav li {
+    display: inline-block;
+    margin: 0 1rem 0 0;
+}
+
+#monitor-menu-nav a {
+    color: white;
+    text-decoration: none;
+}
+
+#monitor-menu-nav a.monitor-active {
+    text-decoration: underline;
+}
+
+
+/* GENERAL */
 table.widefat {
     border: 0;
 }
 
- table.wp-list-table td ol {
-        margin: 0;
-    }
+table.wp-list-table td ol {
+    margin: 0;
+}
 
 .column-created {
     width: 8rem;

@@ -40,7 +40,7 @@ add_action('init', function () {
         return;
     }
 
-    if (str_starts_with(($_GET['page'] ?? ''), 'monitor_')) {
+    if (($_GET['page'] ?? '') === 'monitor') {
         add_action('admin_enqueue_scripts', function () {
             //wp_enqueue_script('monitor-plotly', 'https://cdn.plot.ly/plotly-3.1.0.min.js');
             wp_enqueue_script('monitor-plotly', plugin_dir_url(__FILE__) . '/assets/plotly-3.3.0.min.js', [], MONITOR_VERSION);
@@ -50,55 +50,84 @@ add_action('init', function () {
 
     add_action('admin_menu', function () {
 
-        add_menu_page('Monitor', 'Monitor', 'administrator', 'monitor', '', 'dashicons-performance', 6);
-
-        add_submenu_page(
-                'monitor', 'Settings', 'Settings', 'administrator', 'monitor',
-                function () {
-                    include __DIR__ . '/index.php';
-                }
-        );
-
-        add_submenu_page(
-                'monitor', 'Abilities', 'Abilities', 'administrator', 'monitor_abilities',
-                function () {
+        add_management_page('Monitor', 'Monitor', 'administrator', 'monitor', function () {
+            $section = $_GET['section'] ?? 'index';
+            switch ($section) {
+                case 'settings':
+                    include __DIR__ . '/settings.php';
+                    break;
+                case 'abilities':
                     include __DIR__ . '/abilities/index.php';
-                }
-        );
-
-        add_submenu_page(
-                'monitor', 'Emails', 'Emails', 'administrator', 'monitor_emails',
-                function () {
-                    include __DIR__ . '/emails/index.php';
-                }
-        );
-
-        add_submenu_page(
-                'monitor', 'Scheduler', 'Scheduler', 'administrator', 'monitor_scheduler',
-                function () {
-                    include __DIR__ . '/scheduler/index.php';
-                }
-        );
-
-        add_submenu_page(
-                'monitor', 'HTTP', 'HTTP', 'administrator', 'monitor_http',
-                function () {
-                    include __DIR__ . '/http/index.php';
-                }
-        );
-        add_submenu_page(
-                'monitor', 'REST', 'REST', 'administrator', 'monitor_rest',
-                function () {
+                    break;
+                case 'rest':
                     include __DIR__ . '/rest/index.php';
-                }
-        );
-
-        add_submenu_page(
-                'monitor', 'Users', 'Users', 'administrator', 'monitor_users',
-                function () {
+                    break;
+                case 'http':
+                    include __DIR__ . '/http/index.php';
+                    break;
+                case 'scheduler':
+                    include __DIR__ . '/scheduler/index.php';
+                    break;
+                case 'emails':
+                    include __DIR__ . '/emails/index.php';
+                    break;
+                case 'users':
                     include __DIR__ . '/users/index.php';
-                }
-        );
+                    break;
+                default:
+                    include __DIR__ . '/index.php';
+            }
+        }, 6);
+
+        /*
+          add_submenu_page(
+          'monitor', 'Settings', 'Settings', 'administrator', 'monitor',
+          function () {
+          include __DIR__ . '/index.php';
+          }
+          );
+
+          add_submenu_page(
+          'monitor', 'Abilities', 'Abilities', 'administrator', 'monitor_abilities',
+          function () {
+          include __DIR__ . '/abilities/index.php';
+          }
+          );
+
+          add_submenu_page(
+          'monitor', 'Emails', 'Emails', 'administrator', 'monitor_emails',
+          function () {
+          include __DIR__ . '/emails/index.php';
+          }
+          );
+
+          add_submenu_page(
+          'monitor', 'Scheduler', 'Scheduler', 'administrator', 'monitor_scheduler',
+          function () {
+          include __DIR__ . '/scheduler/index.php';
+          }
+          );
+
+          add_submenu_page(
+          'monitor', 'HTTP', 'HTTP', 'administrator', 'monitor_http',
+          function () {
+          include __DIR__ . '/http/index.php';
+          }
+          );
+          add_submenu_page(
+          'monitor', 'REST', 'REST', 'administrator', 'monitor_rest',
+          function () {
+          include __DIR__ . '/rest/index.php';
+          }
+          );
+
+          add_submenu_page(
+          'monitor', 'Users', 'Users', 'administrator', 'monitor_users',
+          function () {
+          include __DIR__ . '/users/index.php';
+          }
+          );
+         */
     });
 
     add_action('wp_ajax_monitor-ability-data', function () {

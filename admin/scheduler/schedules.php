@@ -6,8 +6,8 @@ if (!is_array($schedules)) {
     $schedules = [];
 }
 ?>
+<?php include __DIR__ . '/../menu.php'; ?>
 <div class="wrap">
-    <h2><?php esc_html_e('Recurring schedules', 'monitor'); ?></h2>
     <?php include __DIR__ . '/nav.php'; ?>
 
     <?php if (count($schedules) === 0) { ?>

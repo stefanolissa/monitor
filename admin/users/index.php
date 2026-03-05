@@ -28,9 +28,8 @@ foreach ($reg_per_day as $data) {
 }
 
 ?>
-
+<?php include __DIR__ . '/../menu.php'; ?>
 <div class="wrap">
-    <h2>Users</h2>
     <?php include __DIR__ . '/nav.php'; ?>
     <p>
     </p>

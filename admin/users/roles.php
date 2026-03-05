@@ -3,8 +3,8 @@ defined('ABSPATH') || exit;
 
 add_thickbox();
 ?>
+<?php include __DIR__ . '/../menu.php'; ?>
 <div class="wrap">
-    <h2>Roles</h2>
     <?php include __DIR__ . '/nav.php'; ?>
 
     <table class="widefat" style="width: auto">

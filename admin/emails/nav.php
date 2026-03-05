@@ -10,6 +10,6 @@ if (empty($monitor_settings['emails'])) {
 }
 ?>
 <p>
-    <a href="?page=monitor_emails">Overview</a>
-    | <a href="?page=monitor_emails&subpage=logs">Logs</a>
+    <a href="?page=monitor&section=emails">Overview</a>
+    | <a href="?page=monitor&section=emails&subpage=logs">Logs</a>
 </p>

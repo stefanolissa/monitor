@@ -16,8 +16,8 @@ switch ($subpage) {
         return;
 }
 ?>
+<?php include __DIR__ . '/../menu.php'; ?>
 <div class="wrap">
-    <h2><?php esc_html_e('Overview', 'monitor'); ?></h2>
     <?php include __DIR__ . '/nav.php'; ?>
 
     <p>

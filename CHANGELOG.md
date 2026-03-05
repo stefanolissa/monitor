@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.0
+- Added the top menu
+- Moved the menu entry under Tools
+
 ## 0.1.9
 - Added the hosts used if the siote is connected to an SMTP
 

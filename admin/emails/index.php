@@ -51,11 +51,8 @@ foreach ($sent_per_day as $data) {
 $avg_duration = $wpdb->get_var("select avg(duration) from {$wpdb->prefix}satollo_monitor_emails");
 
 ?>
-<style>
-    <?php include __DIR__ . '/../style.css'; ?>
-</style>
+<?php include __DIR__ . '/../menu.php'; ?>
 <div class="wrap">
-    <h2>Emails</h2>
     <?php include __DIR__ . '/nav.php'; ?>
 
     <p>For email logging with actions (resend, ...) conside the WP Mail Logging plugin.</p>

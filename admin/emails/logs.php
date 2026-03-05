@@ -115,8 +115,8 @@ add_thickbox();
         width: 5rem;
     }
 </style>
+<?php include __DIR__ . '/../menu.php'; ?>
 <div class="wrap" id="monitor-emails">
-    <h2>Emails</h2>
     <?php include __DIR__ . '/nav.php'; ?>
 
     <p>For email logging with actions (resend, ...) conside the WP Mail Logging plugin.</p>

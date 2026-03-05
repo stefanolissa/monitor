@@ -23,8 +23,9 @@ foreach ($per_day as $data) {
     $per_day_y[] = $data->total;
 }
 ?>
+<?php include __DIR__ . '/../menu.php'; ?>
 <div class="wrap">
-    <h2>HTTP</h2>
+
     <?php include __DIR__ . '/nav.php'; ?>
 
 

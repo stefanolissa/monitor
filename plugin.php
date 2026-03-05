@@ -194,6 +194,7 @@ if (!empty($monitor_settings['scheduler'])) {
                 'pre_http_request' => monitor_get_hook_functions('pre_http_request'),
                 'pre_get_ready_cron_jobs' => monitor_get_hook_functions('pre_get_ready_cron_jobs'),
                 'schedule_event' => monitor_get_hook_functions('schedule_event'),
+
             ];
             $wpdb->update($wpdb->prefix . 'monitor_scheduler', ['filters' => serialize($hooks)], ['id' => $monitor_scheduler_log_id]);
         });
@@ -233,6 +234,8 @@ if (!empty($monitor_settings['scheduler'])) {
 if (!empty($monitor_settings['http'])) {
     $monitor_http_log_id = 0;
     $monitor_http_log_start = 0;
+
+    // filter http_request_timeout for timeout
 
     // See class-wp-http.php
     add_filter('pre_http_request', function ($value, $args, $url) {
