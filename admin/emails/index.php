@@ -33,13 +33,13 @@ function hook_functions_frontend($tag) {
     }
 }
 
-$sent = $wpdb->get_var("select count(*) from {$wpdb->prefix}satollo_monitor_emails");
-$success = $wpdb->get_var("select count(*) from {$wpdb->prefix}satollo_monitor_emails where status=0");
-$failed = $wpdb->get_var("select count(*) from {$wpdb->prefix}satollo_monitor_emails where status=1");
+$sent = $wpdb->get_var("select count(*) from {$wpdb->prefix}monitor_emails");
+$success = $wpdb->get_var("select count(*) from {$wpdb->prefix}monitor_emails where status=0");
+$failed = $wpdb->get_var("select count(*) from {$wpdb->prefix}monitor_emails where status=1");
 
-$sent_30_days = $wpdb->get_var("select count(*) from {$wpdb->prefix}satollo_monitor_emails where created > DATE_SUB(NOW(), INTERVAL 30 DAY)");
+$sent_30_days = $wpdb->get_var("select count(*) from {$wpdb->prefix}monitor_emails where created > DATE_SUB(NOW(), INTERVAL 30 DAY)");
 
-$sent_per_day = $wpdb->get_results("select date(created) as date, count(*) as total from {$wpdb->prefix}satollo_monitor_emails where created > DATE_SUB(NOW(), INTERVAL 30 DAY) group by date(created) order by date(created) asc");
+$sent_per_day = $wpdb->get_results("select date(created) as date, count(*) as total from {$wpdb->prefix}monitor_emails where created > DATE_SUB(NOW(), INTERVAL 30 DAY) group by date(created) order by date(created) asc");
 $sent_per_day_x = [];
 $sent_per_day_y = [];
 
@@ -48,8 +48,7 @@ foreach ($sent_per_day as $data) {
     $sent_per_day_y[] = $data->total;
 }
 
-$avg_duration = $wpdb->get_var("select avg(duration) from {$wpdb->prefix}satollo_monitor_emails");
-
+$avg_duration = $wpdb->get_var("select avg(duration) from {$wpdb->prefix}monitor_emails");
 ?>
 <?php include __DIR__ . '/../menu.php'; ?>
 <div class="wrap">
@@ -57,88 +56,61 @@ $avg_duration = $wpdb->get_var("select avg(duration) from {$wpdb->prefix}satollo
 
     <p>For email logging with actions (resend, ...) conside the WP Mail Logging plugin.</p>
 
-    <div id="dashboard-widgets-wrap">
-        <div id="dashboard-widgets" class="metabox-holder">
+    <div class="monitor-dashboard">
 
+        <div>
 
-            <div id="postbox-container-1" class="postbox-container">
-                <div id="normal-sortables" class="meta-box-sortables">
-                    <div id="monitor-emails-1" class="postbox">
+            <table class="widefat">
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th>Total sent</th>
+                        <td><?= (int) get_option('monitor_emails_sent_count'); ?></td>
+                    </tr>
+                    <tr>
+                        <th>Total failed</th>
+                        <td><?= (int) get_option('monitor_emails_failed_count'); ?></td>
+                    </tr>
 
-                        <div class="postbox-header">
-                            <h2 class="hndle">Statistics</h2>
-                        </div>
-
-                        <div class="inside">
-
-                            <table class="widefat">
-                                <thead>
-                                    <tr>
-                                        <th>Parameter</th>
-                                        <th>Value</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <th>Emails sent</th>
-                                        <td><?= (int) $sent; ?></td>
-                                    </tr>
-                                    <tr>
-                                        <th>Emails sent last 30 days</th>
-                                        <td><?= (int) $sent_30_days; ?></td>
-                                    </tr>
-                                    <tr>
-                                        <th>Mean duration to send an email</th>
-                                        <td><?= round($avg_duration, 3); ?> seconds</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="postbox-container-2" class="postbox-container">
-                <div id="normal-sortables" class="meta-box-sortables">
-                    <div id="monitor-emails-2" class="postbox">
-
-                        <div class="postbox-header">
-                            <h2 class="hndle">Statistics</h2>
-                        </div>
-
-                        <div class="inside">
-
-                            <table class="widefat">
-                                <thead>
-                                    <tr>
-                                        <th>Parameter</th>
-                                        <th>Value</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <th>Successfully sent</th>
-                                        <td><?= (int) $success; ?></td>
-                                    </tr>
-                                    <tr>
-                                        <th>Failed</th>
-                                        <td><?= (int) $failed; ?></td>
-                                    </tr>
-                                    <tr>
-                                        <th>Mean duration to send an email</th>
-                                        <td><?= round($avg_duration, 3); ?> seconds</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+                </tbody>
+            </table>
 
         </div>
+
+
+
+        <div>
+
+            <table class="widefat">
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th>Logged success</th>
+                        <td><?= (int) $success; ?></td>
+                    </tr>
+                    <tr>
+                        <th>Logged failed</th>
+                        <td><?= (int) $failed; ?></td>
+                    </tr>
+                    <tr>
+                        <th>Mean duration to send an email</th>
+                        <td><?= round($avg_duration, 3); ?> seconds</td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+
 
     </div>
 
@@ -162,6 +134,9 @@ $avg_duration = $wpdb->get_var("select avg(duration) from {$wpdb->prefix}satollo
     </script>
 
     <h3>Filters</h3>
+    <p>
+        Filter active now. Filter active when sending a specific email are visible in the logs.
+    </p>
 
     <table class="widefat">
         <thead>
@@ -207,60 +182,6 @@ $avg_duration = $wpdb->get_var("select avg(duration) from {$wpdb->prefix}satollo
             <tr>
                 <th><code>wp_mail_succeeded</code></th>
                 <td><?php hook_functions('wp_mail_succeeded'); ?></td>
-            </tr>
-
-        </tbody>
-    </table>
-
-    <h3>Filters and Actions</h3>
-    <p>
-        Filter and actions active while sending the last email.
-    </p>
-
-    <table class="widefat">
-        <thead>
-            <tr>
-                <th>Parameter</th>
-                <th>Value</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <th><code>wp_mail</code></th>
-                <td><?php hook_functions_frontend('wp_mail'); ?></td>
-            </tr>
-            <tr>
-                <th><code>pre_wp_mail</code></th>
-                <td><?php hook_functions_frontend('pre_wp_mail'); ?></td>
-            </tr>
-            <tr>
-                <th><code>wp_mail_from</code></th>
-                <td><?php hook_functions_frontend('wp_mail_from'); ?></td>
-            </tr>
-
-            <tr>
-                <th><code>wp_mail_from_name</code></th>
-                <td><?php hook_functions_frontend('wp_mail_from_name'); ?></td>
-            </tr>
-            <tr>
-                <th><code>wp_mail_failed</code></th>
-                <td><?php hook_functions_frontend('wp_mail_failed'); ?></td>
-            </tr>
-            <tr>
-                <th><code>wp_mail_content_type</code></th>
-                <td><?php hook_functions_frontend('wp_mail_content_type'); ?></td>
-            </tr>
-            <tr>
-                <th><code>wp_mail_charset</code></th>
-                <td><?php hook_functions_frontend('wp_mail_charset'); ?></td>
-            </tr>
-            <tr>
-                <th><code>phpmailer_init</code></th>
-                <td><?php hook_functions_frontend('phpmailer_init'); ?></td>
-            </tr>
-            <tr>
-                <th><code>wp_mail_succeeded</code></th>
-                <td><?php hook_functions_frontend('wp_mail_succeeded'); ?></td>
             </tr>
 
         </tbody>

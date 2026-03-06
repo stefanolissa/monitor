@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1
+- Added global email sent count
+- Fixed the email overview
+- Added check for object cache possibly affecting the scheduler
+
 ## 0.2.0
 - Added the top menu
 - Moved the menu entry under Tools

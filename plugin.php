@@ -5,7 +5,7 @@
 /**
  * Plugin Name: Monitor
  * Description: Records and displays WP events: abilities, scheduler, http, REST API, emails, ...
- * Version: 0.2.0
+ * Version: 0.2.1
  * Author: Stefano Lissa
  * Author URI: https://www.satollo.net
  * License: GPL-2.0+
@@ -18,7 +18,7 @@
  */
 defined('ABSPATH') || exit;
 
-define('MONITOR_VERSION', '0.2.0');
+define('MONITOR_VERSION', '0.2.1');
 
 /** @var wpdb $wpdb */
 register_deactivation_hook(__FILE__, function () {
@@ -85,6 +85,10 @@ if (!empty($monitor_settings['emails'])) {
             'context' => $context, 'filters' => serialize($hooks)]);
         $monitor_emails_log_id = $wpdb->insert_id;
         $monitor_emails_log_start = microtime(true);
+
+        $sent = (int) get_option('monitor_emails_sent_count');
+        update_option('monitor_emails_sent_count', $sent + 1, false);
+
         return $atts;
     }, 9999);
 
@@ -115,6 +119,9 @@ if (!empty($monitor_settings['emails'])) {
                 ],
                 ['id' => $monitor_emails_log_id]);
         $monitor_emails_log_id = 0;
+
+        $failed = (int) get_option('monitor_emails_failed_count');
+        update_option('monitor_emails_failed_count', $failed + 1, false);
     }, 0);
 }
 
@@ -194,7 +201,6 @@ if (!empty($monitor_settings['scheduler'])) {
                 'pre_http_request' => monitor_get_hook_functions('pre_http_request'),
                 'pre_get_ready_cron_jobs' => monitor_get_hook_functions('pre_get_ready_cron_jobs'),
                 'schedule_event' => monitor_get_hook_functions('schedule_event'),
-
             ];
             $wpdb->update($wpdb->prefix . 'monitor_scheduler', ['filters' => serialize($hooks)], ['id' => $monitor_scheduler_log_id]);
         });
@@ -236,7 +242,6 @@ if (!empty($monitor_settings['http'])) {
     $monitor_http_log_start = 0;
 
     // filter http_request_timeout for timeout
-
     // See class-wp-http.php
     add_filter('pre_http_request', function ($value, $args, $url) {
         global $wpdb, $monitor_http_log_id, $monitor_http_log_start, $monitor_settings;

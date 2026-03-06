@@ -1,3 +1,40 @@
+/* NOTICES */
+.monitor-notice {
+    background-color: white;
+    padding: 0;
+    border: 1px solid #ddd;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.monitor-notice.monitor-notice-success {
+    border-left: 3px solid green;
+}
+
+.monitor-notice.monitor-notice-warning {
+    border-left: 3px solid orange;
+}
+
+.monitor-notice.monitor-notice-error {
+    border-left: 3px solid red;
+}
+
+/* DASHBOARD */
+.monitor-dashboard {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+.monitor-dashboard>div {
+    flex-grow: 1;
+    min-width: 250px;
+    background-color: white;
+    border: 1px solid #ddd;
+    padding: 1rem;
+    margin: 0;
+}
+
 /* TOP MENU */
 
 #monitor-menu {
@@ -27,10 +64,11 @@
 #monitor-menu-nav a {
     color: white;
     text-decoration: none;
+    border-bottom: 3px solid transparent;
 }
 
 #monitor-menu-nav a.monitor-active {
-    text-decoration: underline;
+    border-bottom-color: white;
 }
 
 

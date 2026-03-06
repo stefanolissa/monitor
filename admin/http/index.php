@@ -28,6 +28,12 @@ foreach ($per_day as $data) {
 
     <?php include __DIR__ . '/nav.php'; ?>
 
+    <div class="monitor-dashboard">
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+
 
     <div id="graph" style="margin: 2rem 0"></div>
 

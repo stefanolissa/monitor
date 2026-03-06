@@ -4,8 +4,8 @@ defined('ABSPATH') || exit;
 global $monitor_settings;
 
 if (empty($monitor_settings['abilities'])) {
-    echo '<div class="notice notice-warning">
-            <p>This monitoring is not active.</p>
+    echo '<div class="monitor-notice monitor-notice-warning">
+            This monitoring is not active.
         </div>';
 }
 ?>

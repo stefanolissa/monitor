@@ -1,5 +1,4 @@
 <?php
-
 // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- not relevant
 
 global $wpdb;
@@ -73,7 +72,7 @@ foreach ($crons as $ts => $hooks) {
     }
 }
 $last_run = (int) get_option('monitor_scheduler_last_run');
-$skipped = $oldest_timestamp < $last_run;
+$skipped = $oldest_timestamp < $last_run; // If there is a job older than the last run, it has been skipped (bad)
 $doing_cron = get_transient('doing_cron');
 
 // Compute the minimum interval
@@ -86,189 +85,130 @@ if (is_array($schedules)) {
         }
     }
 }
-
 ?>
 <?php include __DIR__ . '/../menu.php'; ?>
 <div class="wrap">
     <?php include __DIR__ . '/nav.php'; ?>
 
     <?php if ($skipped) { ?>
-        <div class="notice notice-error">
-            <p>
-                On last run not all scheduled tasks have been executed. Usually it's due to fatal error, PHP execution timeout,
-                or bad object cache implementation.
-            </p>
+        <div class="monitor-notice monitor-notice-error">
+            On last run not all scheduled tasks have been executed. Usually it's due to fatal error, PHP execution timeout,
+            or bad object cache implementation.
         </div>
     <?php } ?>
+
+
 
     <p>
         For detailed information on job scheduling install the WP Crontrol plugin.
     </p>
 
+    <div class="monitor-dashboard">
+        <div>
+            <table class="widefat" style="width: 100%">
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th>Average delay</th>
+                        <td>
+                            <?php
+                            if ($avg > $min_interval) {
+                                echo '<span class="red">', esc_html(monitor_format_interval($avg)), '</span>';
+                                echo '<br><small>Greater than the minimim frequency</small>';
+                            } else {
+                                echo '<span class="green">', esc_html(monitor_format_interval($avg)), '</span>';
+                            }
+                            ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Maximum delay</th>
+                        <td><?php echo esc_html(monitor_format_interval($max)); ?></td>
+                    </tr>
+                    <tr>
+                        <th>Minimum delay</th>
+                        <td><?php echo esc_html($min); ?> seconds</td>
+                    </tr>
+                    <tr>
+                        <th>Last run</th>
+                        <td><?php echo esc_html(wp_date('Y-m-d H:i:s', $last_run)); ?></td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
 
 
-    <div id="dashboard-widgets-wrap">
-        <div id="dashboard-widgets" class="metabox-holder">
+        <div>
+            <table class="widefat" style="width: 100%">
+                <thead>
+                    <tr>
+                        <th><?php esc_html_e('Parameter', 'monitor'); ?></th>
+                        <th><?php esc_html_e('Value', 'monitor'); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th><?php esc_html_e('Minimum frequency', 'monitor'); ?></th>
+                        <td><?php echo esc_html(monitor_format_interval($min_interval)); ?></td>
+                    </tr>
+                    <tr>
+                        <th><code>DISABLE_WP_CRON</code></th>
+                        <td><?php echo esc_html((defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) ? 'true' : 'false'); ?></td>
+                    </tr>
+                    <tr>
+                        <th><code>ALTERNATE_WP_CRON</code></th>
+                        <td><?php echo esc_html((defined('ALTERNATE_WP_CRON') && ALTERNATE_WP_CRON) ? 'true' : 'false'); ?></td>
+                    </tr>
+                    <tr>
+                        <th><code>WP_CRON_LOCK_TIMEOUT</code></th>
+                        <td><?php echo esc_html(WP_CRON_LOCK_TIMEOUT) ?></td>
+                    </tr>
+
+                    <tr>
+                        <td>Transient <code>doing_cron</code></td>
+
+                        <td>
+                            <?php
+                            if ($doing_cron) {
+                                echo '<span style="color: orange;">', esc_html(monitor_format_interval(time() - (int) $doing_cron)), '</span>';
+                            }
+                            ?>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
 
-            <div id="postbox-container-1" class="postbox-container">
+        <div>
+            <table class="widefat" style="width: 100%">
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th><a href="?page=monitor&section=scheduler&subpage=jobs">Jobs to be executed</a></th>
+                        <td><?php echo count($ready_jobs); ?></td>
+                    </tr>
+                    <tr>
+                        <th><a href="?page=monitor&section=scheduler&subpage=jobs">Scheduled jobs</a></th>
+                        <td><?php echo count($jobs); ?></td>
+                    </tr>
 
-                <div id="normal-sortables" class="meta-box-sortables">
-                    <div id="monitor-emails" class="postbox">
-
-                        <div class="postbox-header">
-                            <h2 class="hndle">Statistics</h2>
-                        </div>
-
-                        <div class="inside">
-
-                            <table class="widefat" style="width: 100%">
-                                <thead>
-                                    <tr>
-                                        <th>Parameter</th>
-                                        <th>Value</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <th>Average delay</th>
-                                        <td>
-                                            <?php
-                                            if ($avg > $min_interval) {
-                                                echo '<span class="red">', esc_html(monitor_format_interval($avg)), '</span>';
-                                                echo '<br><small>Greater than the minimim frequency</small>';
-                                            } else {
-                                                echo '<span class="green">', esc_html(monitor_format_interval($avg)), '</span>';
-                                            }
-                                            ?>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>Maximum delay</th>
-                                        <td><?php echo esc_html(monitor_format_interval($max)); ?></td>
-                                    </tr>
-                                    <tr>
-                                        <th>Minimum delay</th>
-                                        <td><?php echo esc_html($min); ?> seconds</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Last run</th>
-                                        <td><?php echo esc_html(wp_date('Y-m-d H:i:s', $last_run)); ?></td>
-                                    </tr>
-
-                                </tbody>
-                            </table>
-
-
-                        </div>
-
-
-                    </div>
-
-                </div>
-            </div>
-
-            <div id="postbox-container-2" class="postbox-container">
-
-                <div id="normal-sortables" class="meta-box-sortables">
-
-                    <div id="monitor-emails" class="postbox">
-
-                        <div class="postbox-header">
-                            <h2 class="hndle">Values</h2>
-
-                        </div>
-
-                        <div class="inside">
-                            <table class="widefat" style="width: 100%">
-                                <thead>
-                                    <tr>
-                                        <th><?php esc_html_e('Parameter', 'monitor'); ?></th>
-                                        <th><?php esc_html_e('Value', 'monitor'); ?></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <th><?php esc_html_e('Minimum frequency', 'monitor'); ?></th>
-                                        <td><?php echo esc_html(monitor_format_interval($min_interval)); ?></td>
-                                    </tr>
-                                    <tr>
-                                        <th><code>DISABLE_WP_CRON</code></th>
-                                        <td><?php echo esc_html((defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) ? 'true' : 'false'); ?></td>
-                                    </tr>
-                                    <tr>
-                                        <th><code>ALTERNATE_WP_CRON</code></th>
-                                        <td><?php echo esc_html((defined('ALTERNATE_WP_CRON') && ALTERNATE_WP_CRON) ? 'true' : 'false'); ?></td>
-                                    </tr>
-                                    <tr>
-                                        <th><code>WP_CRON_LOCK_TIMEOUT</code></th>
-                                        <td><?php echo esc_html(WP_CRON_LOCK_TIMEOUT) ?></td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>Transient <code>doing_cron</code></td>
-
-                                        <td>
-                                            <?php
-                                            if ($doing_cron) {
-                                                echo '<span style="color: orange;">', esc_html(monitor_format_interval(time() - (int) $doing_cron)), '</span>';
-                                            }
-                                            ?>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-
-            <div id="postbox-container-2" class="postbox-container">
-
-                <div id="normal-sortables" class="meta-box-sortables">
-
-                    <div id="monitor-schduler-jobs" class="postbox">
-
-                        <div class="postbox-header">
-                            <h2 class="hndle">Jobs</h2>
-
-                        </div>
-
-                        <div class="inside">
-                            <table class="widefat" style="width: 100%">
-                                <thead>
-                                    <tr>
-                                        <th>Parameter</th>
-                                        <th>Value</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <th><a href="?page=monitor_scheduler&subpage=jobs">Jobs to be executed</a></th>
-                                        <td><?php echo count($ready_jobs); ?></td>
-                                    </tr>
-                                    <tr>
-                                        <th>Scheduled jobs</th>
-                                        <td><?php echo count($jobs); ?></td>
-                                    </tr>
-
-                                </tbody>
-                            </table>
-
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-
+                </tbody>
+            </table>
 
         </div>
     </div>
-
-
 
 
     <div id="graph" style="margin: 1.5rem 0"></div>
@@ -295,7 +235,7 @@ if (is_array($schedules)) {
 
 //        var data2 = [{
 //                //x: [1, 2, 3, 4, 5],
-//                y: <?php //echo json_encode($deltas_moving); ?>
+//                y: <?php //echo json_encode($deltas_moving);        ?>
 //            }];
 //
 //        Plotly.newPlot('moving-avg', data2, layout);

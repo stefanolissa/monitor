@@ -1,5 +1,4 @@
 <?php
-
 // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- not relevant
 
 global $wpdb;
@@ -85,10 +84,10 @@ class Monitor_List_Table extends WP_List_Table {
                 return $b;
             case 'filters':
 
-                    $url = admin_url('admin-ajax.php') . '?action=monitor-scheduler-filters&id=' . rawurlencode($item->id);
-                    $url = wp_nonce_url($url, 'monitor-scheduler-filters');
-                    $url .= '&TB_iframe=true'; // Add as last since Thickbox truncate the URL here
-                    return '<a class="thickbox" href="' . esc_attr($url) . '">View</a>';
+                $url = admin_url('admin-ajax.php') . '?action=monitor-scheduler-filters&id=' . rawurlencode($item->id);
+                $url = wp_nonce_url($url, 'monitor-scheduler-filters');
+                $url .= '&TB_iframe=true'; // Add as last since Thickbox truncate the URL here
+                return '<a class="thickbox" href="' . esc_attr($url) . '">View</a>';
 
             default:
                 return '?';
@@ -104,6 +103,13 @@ add_thickbox();
 <?php include __DIR__ . '/../menu.php'; ?>
 <div class="wrap">
     <?php include __DIR__ . '/nav.php'; ?>
+
+    <?php if (wp_using_ext_object_cache()) { ?>
+        <div class="monitor-notice monitor-notice-warning">
+            An object cache is active. If you see on each schduler run that only one job is executed even if there are
+            more than one queued, try to disable the object cache.
+        </div>
+    <?php } ?>
 
     <form method="post">
         <?php wp_nonce_field('monitor-action'); ?>
