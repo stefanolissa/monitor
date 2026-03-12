@@ -100,6 +100,14 @@ $table->prepare_items();
 
 add_thickbox();
 ?>
+<style>
+    .column-ip {
+        width: 6rem;
+    }
+    .column-filters {
+        width: 6rem;
+    }
+</style>
 <?php include __DIR__ . '/../menu.php'; ?>
 <div class="wrap">
     <?php include __DIR__ . '/nav.php'; ?>

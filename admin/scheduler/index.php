@@ -210,15 +210,15 @@ if (is_array($schedules)) {
         </div>
     </div>
 
+    <?php if (!$deltas) { ?>
+        <div style="margin: 1.5rem 0; padding-top: 3rem; background-color: #eee; color: #ccc; border: 1px solid #ccc; height: 250px; font-size: 2rem; text-align: center;">
+            No recent data to show diagrams.
+        </div>
+    <?php } else { ?>
+        <div id="graph" style="margin: 1.5rem 0"></div>
+        <div id="moving-avg" style="margin: 1.5rem 0"></div>
+    <?php } ?>
 
-    <div id="graph" style="margin: 1.5rem 0"></div>
-
-    <div id="moving-avg" style="margin: 1.5rem 0"></div>
-
-    <form method="post">
-        <?php wp_nonce_field('monitor-reset'); ?>
-        <button name="reset" class="button button-secondary">Reset</button>
-    </form>
 </div>
 
 <script>
@@ -235,7 +235,7 @@ if (is_array($schedules)) {
 
 //        var data2 = [{
 //                //x: [1, 2, 3, 4, 5],
-//                y: <?php //echo json_encode($deltas_moving);        ?>
+//                y: <?php //echo json_encode($deltas_moving);         ?>
 //            }];
 //
 //        Plotly.newPlot('moving-avg', data2, layout);

@@ -39,19 +39,4 @@ if (!is_array($schedules)) {
         </tbody>
     </table>
 
-    <div id="graph"></div>
 </div>
-
-<script>
-    jQuery(function () {
-        var layout = {
-            title: {text: 'Interval between scheduler activations (seconds)'}
-        };
-        var data = [{
-                //x: [1, 2, 3, 4, 5],
-                y: <?php echo json_encode($deltas); ?>
-            }];
-
-        Plotly.newPlot('graph', data, layout);
-    });
-</script>

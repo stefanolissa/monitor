@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.2
+* Fixed the scheduler overview page
+
 ## 0.2.1
 - Added global email sent count
 - Fixed the email overview

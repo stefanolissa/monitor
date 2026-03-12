@@ -5,7 +5,7 @@
 /**
  * Plugin Name: Monitor
  * Description: Records and displays WP events: abilities, scheduler, http, REST API, emails, ...
- * Version: 0.2.1
+ * Version: 0.2.2
  * Author: Stefano Lissa
  * Author URI: https://www.satollo.net
  * License: GPL-2.0+
@@ -16,9 +16,21 @@
  * Plugin URI: https://www.satollo.net/plugins/monitor
  * Update URI: satollo-monitor
  */
-defined('ABSPATH') || exit;
 
-define('MONITOR_VERSION', '0.2.1');
+defined('ABSPATH') || exit;
+define('MONITOR_VERSION', '0.2.2');
+
+//if (is_admin()) {
+//add_action('init', function () {
+//    if (defined('SATOLLO_MONITOR_VERSION')) {
+//            add_action('admin_notices', function () {
+//                echo '<div class="notice notice-warning"><p>The Satollo Monitor plugin is active. To use the full version, please deactivate it.</p></div>';
+//            });
+//        }
+//    });
+//}
+
+
 
 /** @var wpdb $wpdb */
 register_deactivation_hook(__FILE__, function () {
@@ -27,6 +39,8 @@ register_deactivation_hook(__FILE__, function () {
     delete_option('monitor_update_data');
     wp_unschedule_hook('monitor');
 });
+
+global $monitor_settings;
 
 $monitor_settings = get_option('monitor_settings');
 
@@ -381,6 +395,8 @@ function monitor_clean_logs() {
 }
 
 // Only for alpha/beta versions
-if (is_admin() || defined('DOING_CRON') && DOING_CRON && file_exists(__DIR__ . '/includes/repo.php')) {
+if (is_admin() || defined('DOING_CRON') && DOING_CRON) {
     require_once __DIR__ . '/includes/repo.php';
 }
+
+
