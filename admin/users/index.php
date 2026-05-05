@@ -1,7 +1,10 @@
 <?php
-global $wpdb;
 
 defined('ABSPATH') || exit;
+
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- not relevant
+
+global $wpdb;
 
 // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- not relevant
 $subpage = sanitize_key($_GET['subpage'] ?? '');

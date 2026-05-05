@@ -1,9 +1,10 @@
 <?php
+
+defined('ABSPATH') || exit;
+
 // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- not relevant
 
 global $wpdb;
-
-defined('ABSPATH') || exit;
 
 // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- not necessary
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
@@ -17,19 +18,19 @@ class Monitor_List_Table extends WP_List_Table {
 
     public function __construct() {
         parent::__construct([
-            'singular' => 'Request',
-            'plural' => 'Requests',
+            'singular' => __('Request', 'satollo-monitor'),
+            'plural' => __('Requests', 'satollo-monitor'),
             'ajax' => false,
         ]);
     }
 
     public function get_columns() {
         $columns = [
-            'created' => 'Created',
-            'code' => 'Code',
-            'method' => 'Method',
-            'route' => 'Route',
-            'params' => 'Params',
+            'created' => __('Created', 'satollo-monitor'),
+            'code' => __('Code', 'satollo-monitor'),
+            'method' => __('Method', 'satollo-monitor'),
+            'route' => __('Route', 'satollo-monitor'),
+            'params' => __('Params', 'satollo-monitor'),
         ];
         return $columns;
     }
@@ -89,29 +90,14 @@ $table->prepare_items();
 
 add_thickbox();
 ?>
-<style>
-<?php include __DIR__ . '/../style.css'; ?>
-    .column-duration {
-        width: 5rem;
-    }
-    .column-method {
-        width: 4rem;
-    }
-    .column-code {
-        width: 3rem;
-    }
-    .column-url {
-        width: 20rem;
-    }
-</style>
 <?php include __DIR__ . '/../menu.php'; ?>
 <div class="wrap">
     <?php include __DIR__ . '/nav.php'; ?>
 
     <form method="post">
         <?php wp_nonce_field('monitor-action'); ?>
-        <button name="clear" class="button button-secondary"><?php esc_html_e('Clear', 'monitor'); ?></button>
-        <a href="<?php echo esc_attr(get_rest_url()); ?>" class="button button-secondary" target="_blank"><?php esc_html_e('See main endpoint', 'monitor'); ?></a>
+        <button name="clear" class="button button-secondary"><?php esc_html_e('Clear', 'satollo-monitor'); ?></button>
+        <a href="<?php echo esc_attr(get_rest_url()); ?>" class="button button-secondary" target="_blank"><?php esc_html_e('See main endpoint', 'satollo-monitor'); ?></a>
     </form>
 
     <?php $table->display(); ?>

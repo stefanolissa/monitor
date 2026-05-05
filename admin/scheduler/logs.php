@@ -24,19 +24,20 @@ class Monitor_List_Table extends WP_List_Table {
 
     public function __construct() {
         parent::__construct([
-            'singular' => __('Activation', 'monitor'),
-            'plural' => __('Activations', 'monitor'),
+            'singular' => __('Activation', 'satollo-monitor'),
+            'plural' => __('Activations', 'satollo-monitor'),
             'ajax' => false,
         ]);
     }
 
     public function get_columns() {
         $columns = [
-            'created' => 'Created',
+            'created' => __('Created', 'satollo-monitor'),
             'ip' => 'IP',
-            'ready_jobs' => 'Ready jobs',
-            'executed_jobs' => 'Executed jobs',
-            'filters' => 'Filters',
+            'note' => 'Note',
+            'ready_jobs' => __('Ready jobs', 'satollo-monitor'),
+            'executed_jobs' => __('Executed jobs', 'satollo-monitor'),
+            'filters' => __('Filters', 'satollo-monitor'),
         ];
         return $columns;
     }
@@ -68,6 +69,8 @@ class Monitor_List_Table extends WP_List_Table {
                 return esc_html($item->created);
             case 'ip':
                 return esc_html($item->ip);
+            case 'note':
+                return esc_html($item->note);
             case 'ready_jobs':
                 $b = '<ol>';
                 foreach (unserialize($item->ready_jobs) as $job) {
@@ -114,18 +117,17 @@ add_thickbox();
 
     <?php if (wp_using_ext_object_cache()) { ?>
         <div class="monitor-notice monitor-notice-warning">
-            An object cache is active. If you see on each schduler run that only one job is executed even if there are
+            An object cache is active. If you see on each scheduler run that only one job is executed even if there are
             more than one queued, try to disable the object cache.
         </div>
     <?php } ?>
 
     <form method="post">
         <?php wp_nonce_field('monitor-action'); ?>
-        <button name="clear" class="button button-secondary"><?php esc_html_e('Clear', 'monitor'); ?></button>
-        <button name="add" class="button button-secondary"><?php esc_html_e('Add and execute a job', 'monitor'); ?></button>
+        <button name="clear" class="button button-secondary"><?php esc_html_e('Clear', 'satollo-monitor'); ?></button>
+        <button name="add" class="button button-secondary"><?php esc_html_e('Add and execute a job', 'satollo-monitor'); ?></button>
 
     </form>
     <?php $table->display(); ?>
-
 
 </div>

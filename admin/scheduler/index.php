@@ -23,17 +23,23 @@ switch ($subpage) {
         return;
 }
 
-$starts = $wpdb->get_results("select UNIX_TIMESTAMP(created) as ts from {$wpdb->prefix}monitor_scheduler WHERE created > DATE_SUB(NOW(), INTERVAL 3 DAY) order by id asc");
+$starts = $wpdb->get_results("select created, UNIX_TIMESTAMP(created) as ts from {$wpdb->prefix}monitor_scheduler WHERE created > DATE_SUB(NOW(), INTERVAL 3 DAY) order by id asc");
 $deltas = [];
+$deltas_x = [];
 $avg = 0;
 $max = 0;
 $min = 0;
+$tail_idx = 0;
 if (count($starts) >= 2) {
     $deltas = [];
     $ts = $starts[0]->ts;
     for ($i = 1; $i < count($starts); $i++) {
         $deltas[] = $starts[$i]->ts - $ts;
         $ts = $starts[$i]->ts;
+        $deltas_x[] = $starts[$i]->created;
+        if (!$tail_idx && $ts > time()-3* HOUR_IN_SECONDS) {
+            $tail_idx = $i;
+        }
     }
     $avg = array_sum($deltas) / count($deltas);
     $max = max($deltas);
@@ -97,8 +103,6 @@ if (is_array($schedules)) {
         </div>
     <?php } ?>
 
-
-
     <p>
         For detailed information on job scheduling install the WP Crontrol plugin.
     </p>
@@ -148,13 +152,13 @@ if (is_array($schedules)) {
             <table class="widefat" style="width: 100%">
                 <thead>
                     <tr>
-                        <th><?php esc_html_e('Parameter', 'monitor'); ?></th>
-                        <th><?php esc_html_e('Value', 'monitor'); ?></th>
+                        <th><?php esc_html_e('Parameter', 'satollo-monitor'); ?></th>
+                        <th><?php esc_html_e('Value', 'satollo-monitor'); ?></th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <th><?php esc_html_e('Minimum frequency', 'monitor'); ?></th>
+                        <th><?php esc_html_e('Minimum frequency', 'satollo-monitor'); ?></th>
                         <td><?php echo esc_html(monitor_format_interval($min_interval)); ?></td>
                     </tr>
                     <tr>
@@ -211,11 +215,12 @@ if (is_array($schedules)) {
     </div>
 
     <?php if (!$deltas) { ?>
-        <div style="margin: 1.5rem 0; padding-top: 3rem; background-color: #eee; color: #ccc; border: 1px solid #ccc; height: 250px; font-size: 2rem; text-align: center;">
+        <div  class="monitor-nodata">
             No recent data to show diagrams.
         </div>
     <?php } else { ?>
         <div id="graph" style="margin: 1.5rem 0"></div>
+        <div id="graph-tail" style="margin: 1.5rem 0"></div>
         <div id="moving-avg" style="margin: 1.5rem 0"></div>
     <?php } ?>
 
@@ -224,18 +229,34 @@ if (is_array($schedules)) {
 <script>
     jQuery(function () {
         var layout = {
-            title: {text: 'Interval between scheduler activations (seconds)'}
+            title: {text: 'Interval between scheduler activations (seconds)'},
+            yaxis: {
+                rangemode: 'tozero'
+            }
         };
         var data = [{
-                //x: [1, 2, 3, 4, 5],
+                x: <?php echo json_encode($deltas_x); ?>,
                 y: <?php echo json_encode($deltas); ?>
             }];
 
         Plotly.newPlot('graph', data, layout);
 
+        var layout_tail = {
+            title: {text: 'Interval between scheduler activations (seconds)'},
+            yaxis: {
+                rangemode: 'tozero'
+            }
+        };
+        var data_tail = [{
+                x: <?php echo json_encode(array_slice($deltas_x, $tail_idx)); ?>,
+                y: <?php echo json_encode(array_slice($deltas, $tail_idx)); ?>
+            }];
+
+        Plotly.newPlot('graph-tail', data_tail, layout_tail);
+
 //        var data2 = [{
 //                //x: [1, 2, 3, 4, 5],
-//                y: <?php //echo json_encode($deltas_moving);         ?>
+//                y: <?php //echo json_encode($deltas_moving);          ?>
 //            }];
 //
 //        Plotly.newPlot('moving-avg', data2, layout);

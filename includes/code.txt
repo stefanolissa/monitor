@@ -1,0 +1,28 @@
+// 1. Hook into 'init' or 'wp' to register the schedule
+add_action('wp', 'my_custom_daily_schedule');
+
+function my_custom_daily_schedule() {
+    // Ensure the event isn't already scheduled
+    if (!wp_next_scheduled('my_8am_daily_event')) {
+
+        // Get the site's local time for 8:00 AM
+        // 'wp_timezone()' ensures we respect the settings in General > Timezone
+        $start_time = new DateTime('08:00:00', wp_timezone());
+
+        // If 8:00 AM has already passed today, schedule it for tomorrow
+        if ($start_time < new DateTime('now', wp_timezone())) {
+            $start_time->modify('+1 day');
+        }
+
+        // Schedule the event using a UTC timestamp (WordPress requirement)
+        wp_schedule_event($start_time->getTimestamp(), 'daily', 'my_8am_daily_event');
+    }
+}
+
+// 2. Hook your actual function to the event name
+add_action('my_8am_daily_event', 'do_my_morning_task');
+
+function do_my_morning_task() {
+    // Your code to run at 8:00 AM goes here
+    error_log("The 8:00 AM job has executed!");
+}

@@ -1,9 +1,9 @@
 <?php
+defined('ABSPATH') || exit;
+
 // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- not relevant
 
 global $wpdb;
-
-defined('ABSPATH') || exit;
 
 // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- not necessary
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
@@ -101,12 +101,15 @@ $table->prepare_items();
 add_thickbox();
 ?>
 <style>
+    .manage-column {
+        min-width: 5rem;
+    }
     .column-status {
         text-align: center;
         width: 3rem;
     }
     .column-text {
-        width: 25rem;
+        width: 15rem;
     }
     .column-filters {
         width: 6rem;
@@ -114,9 +117,12 @@ add_thickbox();
     .column-duration {
         width: 5rem;
     }
+    .column-subject {
+        width: 10rem;
+    }
 </style>
 <?php include __DIR__ . '/../menu.php'; ?>
-<div class="wrap" id="monitor-emails">
+<div class="wrap">
     <?php include __DIR__ . '/nav.php'; ?>
 
     <p>For email logging with actions (resend, ...) conside the WP Mail Logging plugin.</p>

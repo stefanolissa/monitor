@@ -1,6 +1,5 @@
 <?php
 defined('ABSPATH') || exit;
-
 global $monitor_settings;
 
 if (empty($monitor_settings['abilities'])) {
@@ -10,7 +9,6 @@ if (empty($monitor_settings['abilities'])) {
 }
 ?>
 <p>
-    <a href="?page=monitor&section=abilities"><?php esc_html_e('Overview', 'monitor'); ?></a>
-    | <a href="?page=monitor&section=abilities&subpage=list"><?php esc_html_e('List', 'monitor'); ?></a>
-    | <a href="?page=monitor&section=abilities&subpage=logs"><?php esc_html_e('Logs', 'monitor'); ?></a>
+    <a href="?page=monitor&section=abilities"><?php esc_html_e('List', 'satollo-monitor'); ?></a>
+    | <a href="?page=monitor&section=abilities&subpage=logs"><?php esc_html_e('Logs', 'satollo-monitor'); ?></a>
 </p>

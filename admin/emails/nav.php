@@ -10,6 +10,6 @@ if (empty($monitor_settings['emails'])) {
 }
 ?>
 <p>
-    <a href="?page=monitor&section=emails">Overview</a>
-    | <a href="?page=monitor&section=emails&subpage=logs">Logs</a>
+    <a href="?page=monitor&section=emails"><?php esc_html_e('Overview', 'satollo-monitor'); ?></a>
+    | <a href="?page=monitor&section=emails&subpage=logs"><?php esc_html_e('Logs', 'satollo-monitor'); ?></a>
 </p>

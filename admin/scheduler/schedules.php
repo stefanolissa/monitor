@@ -23,9 +23,9 @@ if (!is_array($schedules)) {
     <table class="widefat" style="width: auto">
         <thead>
             <tr>
-                <th><?php esc_html_e('Name', 'monitor'); ?></th>
-                <th><?php esc_html_e('Key', 'monitor'); ?></th>
-                <th><?php esc_html_e('Interval', 'monitor'); ?></th>
+                <th><?php esc_html_e('Name', 'satollo-monitor'); ?></th>
+                <th><?php esc_html_e('Key', 'satollo-monitor'); ?></th>
+                <th><?php esc_html_e('Interval', 'satollo-monitor'); ?></th>
             </tr>
         </thead>
         <tbody>

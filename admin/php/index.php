@@ -5,7 +5,7 @@ defined('ABSPATH') || exit;
 
 global $wpdb;
 
-$per_day = $wpdb->get_results("select date(created) as date, count(*) as total from {$wpdb->prefix}monitor_http where created > DATE_SUB(NOW(), INTERVAL 30 DAY) group by date(created) order by date(created) asc");
+$per_day = $wpdb->get_results("select date(created) as date, count(*) as total from {$wpdb->prefix}monitor_php where created > DATE_SUB(NOW(), INTERVAL 30 DAY) group by date(created) order by date(created) asc");
 $per_day_x = [];
 $per_day_y = [];
 
@@ -44,22 +44,5 @@ foreach ($per_day as $data) {
             Plotly.newPlot('graph', data, layout);
         });
     </script>
-
-    <table class="widefat" style="width: auto">
-        <thead>
-            <tr>
-                <th><?php esc_html_e('Date', 'satollo-monitor'); ?></th>
-                <th><?php esc_html_e('Count', 'satollo-monitor'); ?></th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($per_day as $data) { ?>
-                <tr>
-                    <td><?php echo esc_html($data->date); ?></td>
-                    <td><?php echo esc_html($data->total); ?></td>
-                </tr>
-            <?php } ?>
-        </tbody>
-    </table>
 
 </div>

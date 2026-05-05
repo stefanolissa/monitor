@@ -5,7 +5,7 @@ defined('ABSPATH') || exit;
 global $wpdb, $charset_collate;
 
 if (WP_DEBUG) {
-    error_log('Monitor > Activating');
+    //error_log('Monitor > Activating');
 }
 
 require_once ABSPATH . 'wp-admin/includes/upgrade.php'; // Isn't there a constant for the admin inclusion path?
@@ -22,6 +22,22 @@ $sql = "CREATE TABLE `" . $wpdb->prefix . "monitor_abilities` (
             `output` TEXT,
             PRIMARY KEY (`id`),
             KEY `name` (`name`)
+            ) $charset_collate;";
+
+dbDelta($sql);
+if ($wpdb->last_error) {
+    error_log($wpdb->last_error);
+}
+
+$sql = "CREATE TABLE `" . $wpdb->prefix . "monitor_aiclient` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            `provider` varchar(200) NOT NULL DEFAULT '',
+            `model` varchar(200) NOT NULL DEFAULT '',
+            `tokens` int NOT NULL DEFAULT 0,
+            `duration` double DEFAULT 0,
+            `context` varchar(50) NOT NULL DEFAULT '',
+            PRIMARY KEY (`id`)
             ) $charset_collate;";
 
 dbDelta($sql);
@@ -58,6 +74,9 @@ $sql = "CREATE TABLE `" . $wpdb->prefix . "monitor_scheduler` (
             `filters` longtext,
             `ready_jobs` longtext,
             `executed_jobs` longtext,
+            `note` varchar(250) NOT NULL DEFAULT '',
+            `get_lock` varchar(50) NOT NULL DEFAULT '',
+            `transient_lock` varchar(50) NOT NULL DEFAULT '',
             PRIMARY KEY (`id`)
             ) $charset_collate;";
 
@@ -100,7 +119,29 @@ if ($wpdb->last_error) {
     error_log($wpdb->last_error);
 }
 
+$sql = "CREATE TABLE `" . $wpdb->prefix . "monitor_php` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            `context` varchar(50) NOT NULL DEFAULT '',
+            `code` int NOT NULL default 0,
+            `message` varchar(1024) NOT NULL DEFAULT '',
+            `file` varchar(1024) NOT NULL DEFAULT '',
+            `line` int NOT NULL default 0,
+            PRIMARY KEY (`id`)
+            ) $charset_collate;";
+
+dbDelta($sql);
+if ($wpdb->last_error) {
+    error_log($wpdb->last_error);
+}
+
 // Cleanup process
 if (!wp_next_scheduled('monitor_clean_logs') && (!defined('WP_INSTALLING') || !WP_INSTALLING)) {
     wp_schedule_event(time() + 30, 'daily', 'monitor_clean_logs');
 }
+
+// Done inside the settings page
+//if (!wp_next_scheduled('monitor_report') && (!defined('WP_INSTALLING') || !WP_INSTALLING)) {
+//    $report_time = new DateTime('07:00:00', wp_timezone());
+//    wp_schedule_event($report_time->getTimestamp() + DAY_IN_SECONDS, 'daily', 'monitor_report');
+//}

@@ -10,6 +10,6 @@ if (empty($monitor_settings['http'])) {
 }
 ?>
 <p>
-    <a href="?page=monitor&section=http"><?php esc_html_e('Overview', 'satollo-monitor'); ?></a>
-    | <a href="?page=monitor&section=http&subpage=logs"><?php esc_html_e('Logs', 'satollo-monitor'); ?></a>
+    <a href="?page=monitor&section=php"><?php esc_html_e('Overview', 'satollo-monitor'); ?></a>
+    | <a href="?page=monitor&section=php&subpage=logs"><?php esc_html_e('Logs', 'satollo-monitor'); ?></a>
 </p>

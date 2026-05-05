@@ -1,18 +1,9 @@
 <?php
-global $wpdb;
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- not relevant
 
 defined('ABSPATH') || exit;
 
-$subpage = $_GET['subpage'] ?? '';
-
-switch ($subpage) {
-    case 'logs':
-        include __DIR__ . '/logs.php';
-        return;
-    case 'filters':
-        include __DIR__ . '/filters.php';
-        return;
-}
+global $wpdb;
 
 function hook_functions($tag) {
     $functions = monitor_get_hook_functions($tag);
@@ -48,13 +39,13 @@ foreach ($sent_per_day as $data) {
     $sent_per_day_y[] = $data->total;
 }
 
-$avg_duration = $wpdb->get_var("select avg(duration) from {$wpdb->prefix}monitor_emails");
+$avg_duration = $wpdb->get_var("select avg(duration) from {$wpdb->prefix}monitor_emails where status=1");
 ?>
 <?php include __DIR__ . '/../menu.php'; ?>
 <div class="wrap">
     <?php include __DIR__ . '/nav.php'; ?>
 
-    <p>For email logging with actions (resend, ...) conside the WP Mail Logging plugin.</p>
+    <p>For email logging with actions (resend, ...) consider the WP Mail Logging plugin.</p>
 
     <div class="monitor-dashboard">
 
@@ -104,7 +95,7 @@ $avg_duration = $wpdb->get_var("select avg(duration) from {$wpdb->prefix}monitor
                     </tr>
                     <tr>
                         <th>Mean duration to send an email</th>
-                        <td><?= round($avg_duration, 3); ?> seconds</td>
+                        <td><?= esc_html(round($avg_duration, 3)); ?> seconds</td>
                     </tr>
                 </tbody>
             </table>
@@ -121,7 +112,10 @@ $avg_duration = $wpdb->get_var("select avg(duration) from {$wpdb->prefix}monitor
     <script>
         jQuery(function () {
             var layout = {
-                title: {text: 'Emails sent per day'}
+                title: {text: 'Emails sent per day'},
+                yaxis: {
+                    rangemode: 'tozero'
+                }
             };
             var data = [{
                     x: <?= json_encode($sent_per_day_x); ?>,

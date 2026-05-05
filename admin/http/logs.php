@@ -34,22 +34,22 @@ class Monitor_List_Table extends WP_List_Table {
 
     public function __construct() {
         parent::__construct([
-            'singular' => 'Request',
-            'plural' => 'Requests',
+            'singular' => __('Request', 'satollo-monitor'),
+            'plural' => __('Requests', 'satollo-monitor'),
             'ajax' => false,
         ]);
     }
 
     public function get_columns() {
         $columns = [
-            'created' => 'Created',
-            'method' => 'Method',
-            'code' => 'Code',
+            'created' => __('Created', 'satollo-monitor'),
+            'method' => __('Method', 'satollo-monitor'),
+            'code' => __('Code', 'satollo-monitor'),
             'url' => 'URL',
-            'duration' => 'Duration (s)',
-            'context' => 'Context',
-            'text' => 'Note',
-            'args' => 'Args',
+            'duration' => __('Duration (s)', 'satollo-monitor'),
+            'context' => __('Context', 'satollo-monitor'),
+            'text' => __('Note', 'satollo-monitor'),
+            'args' => __('Args', 'satollo-monitor'),
         ];
         return $columns;
     }
@@ -131,10 +131,10 @@ add_thickbox();
 
         <form method="post">
             <?php wp_nonce_field('monitor-action'); ?>
-        <button name="test" class="button button-secondary"><?php esc_html_e('Test good URL', 'monitor'); ?></button>
-        <button name="error" class="button button-secondary"><?php esc_html_e('Simulate bad URL', 'monitor'); ?></button>
-        <button name="notfound" class="button button-secondary"><?php esc_html_e('Simulate not found', 'monitor'); ?></button>
-        <button name="clear" class="button button-secondary"><?php esc_html_e('Clear', 'monitor'); ?></button>
+        <button name="test" class="button button-secondary"><?php esc_html_e('Test good URL', 'satollo-monitor'); ?></button>
+        <button name="error" class="button button-secondary"><?php esc_html_e('Simulate bad URL', 'satollo-monitor'); ?></button>
+        <button name="notfound" class="button button-secondary"><?php esc_html_e('Simulate not found', 'satollo-monitor'); ?></button>
+        <button name="clear" class="button button-secondary"><?php esc_html_e('Clear', 'satollo-monitor'); ?></button>
         </form>
 
     <?php $table->display(); ?>

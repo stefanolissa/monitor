@@ -7,18 +7,18 @@ class Monitor_List_Table extends WP_List_Table {
 
     public function __construct() {
         parent::__construct([
-            'singular' => __('Job', 'monitor'),
-            'plural' => __('Jobs', 'monitor'),
+            'singular' => __('Job', 'satollo-monitor'),
+            'plural' => __('Jobs', 'satollo-monitor'),
             'ajax' => false,
         ]);
     }
 
     public function get_columns() {
         $columns = [
-            'hook' => __('Event', 'monitor'),
-            'timestamp' => __('Timestamp', 'monitor'),
-            'when' => __('When', 'monitor'),
-            'functions' => __('Functions', 'monitor'),
+            'hook' => __('Event', 'satollo-monitor'),
+            'timestamp' => __('Timestamp', 'satollo-monitor'),
+            'when' => __('When', 'satollo-monitor'),
+            'functions' => __('Functions', 'satollo-monitor'),
         ];
         return $columns;
     }

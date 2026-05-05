@@ -9,10 +9,24 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         $data = wp_kses_post_deep(wp_unslash($_POST['data']));
 
         update_option('monitor_settings', $data);
+
+//        if (isset($data['report'])) {
+//            wp_unschedule_hook('monitor_report');
+//            $report_time = new DateTime('07:00:00', wp_timezone());
+//            wp_schedule_event($report_time->getTimestamp() + DAY_IN_SECONDS, 'daily', '\Satollo\Monitor\monitor_report');
+//        } else {
+//            wp_unschedule_hook('monitor_report');
+//        }
     }
+
+
 
     if (isset($_POST['clean'])) {
         monitor_clean_logs();
+    }
+
+    if (isset($_POST['report'])) {
+        \Satollo\Monitor\monitor_report();
     }
 }
 
@@ -21,8 +35,6 @@ $data = get_option('monitor_settings', []);
 wp_enqueue_script('dashboard');
 
 $log_days = $data['log_days'] ?? 30;
-$report = $data['report'] ?? '';
-$alerts = $data['alerts'] ?? '';
 ?>
 <?php include __DIR__ . '/menu.php'; ?>
 <div class="wrap">
@@ -32,7 +44,15 @@ $alerts = $data['alerts'] ?? '';
         <table class="form-table" role="presentation">
             <tr>
                 <th>
-                    <?php esc_html_e('Monitor emails', 'monitor'); ?>
+                    <?php esc_html_e('Monitor AI Client', 'satollo-monitor'); ?>
+                </th>
+                <td>
+                    <input type="checkbox" value="1" name="data[aiclient]" <?= isset($data['aiclient']) ? 'checked' : ''; ?>>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <?php esc_html_e('Monitor emails', 'satollo-monitor'); ?>
                 </th>
                 <td>
                     <input type="checkbox" value="1" name="data[emails]" <?= isset($data['emails']) ? 'checked' : ''; ?>>
@@ -40,7 +60,7 @@ $alerts = $data['alerts'] ?? '';
             </tr>
             <tr>
                 <th>
-                    <?php esc_html_e('Monitor the abilities', 'monitor'); ?>
+                    <?php esc_html_e('Monitor the abilities', 'satollo-monitor'); ?>
                 </th>
                 <td>
                     <input type="checkbox" value="1" name="data[abilities]" <?php echo isset($data['abilities']) ? 'checked' : ''; ?>>
@@ -48,7 +68,7 @@ $alerts = $data['alerts'] ?? '';
             </tr>
             <tr>
                 <th>
-                    <?php esc_html_e('Monitor the scheduler', 'monitor'); ?>
+                    <?php esc_html_e('Monitor the scheduler', 'satollo-monitor'); ?>
                 </th>
                 <td>
                     <input type="checkbox" value="1" name="data[scheduler]" <?php echo isset($data['scheduler']) ? 'checked' : ''; ?>>
@@ -56,7 +76,15 @@ $alerts = $data['alerts'] ?? '';
             </tr>
             <tr>
                 <th>
-                    <?php esc_html_e('Monitor the HTTP calls', 'monitor'); ?>
+                    <?php esc_html_e('Monitor PHP errors', 'satollo-monitor'); ?>
+                </th>
+                <td>
+                    <input type="checkbox" value="1" name="data[php]" <?php echo isset($data['php']) ? 'checked' : ''; ?>>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <?php esc_html_e('Monitor the HTTP calls', 'satollo-monitor'); ?>
                 </th>
                 <td>
                     <input type="checkbox" value="1" name="data[http]" <?php echo isset($data['http']) ? 'checked' : ''; ?>>
@@ -69,7 +97,7 @@ $alerts = $data['alerts'] ?? '';
 
             <tr>
                 <th>
-                    <?php esc_html_e('Include the wp-cron.php autocall', 'monitor'); ?>
+                    <?php esc_html_e('Include the wp-cron.php autocall', 'satollo-monitor'); ?>
                 </th>
                 <td>
                     <input type="checkbox" value="1" name="data[http_wpcron]" <?php echo isset($data['http_wpcron']) ? 'checked' : ''; ?>>
@@ -82,7 +110,7 @@ $alerts = $data['alerts'] ?? '';
 
             <tr>
                 <th>
-                    <?php esc_html_e('Monitor the REST API calls', 'monitor'); ?>
+                    <?php esc_html_e('Monitor the REST API calls', 'satollo-monitor'); ?>
                 </th>
                 <td>
                     <input type="checkbox" value="1" name="data[rest]" <?php echo isset($data['rest']) ? 'checked' : ''; ?>>
@@ -93,7 +121,7 @@ $alerts = $data['alerts'] ?? '';
 
             <tr>
                 <th>
-                    <?php esc_html_e('Include the wp/v2 calls', 'monitor'); ?>
+                    <?php esc_html_e('Include the wp/v2 calls', 'satollo-monitor'); ?>
                     Include the wp/v2 calls
                 </th>
                 <td>
@@ -105,7 +133,7 @@ $alerts = $data['alerts'] ?? '';
             </tr>
             <tr>
                 <th>
-                    <?php esc_html_e('Retention', 'monitor'); ?>
+                    <?php esc_html_e('Retention', 'satollo-monitor'); ?>
                 </th>
                 <td>
                     <select name="data[log_days]">
@@ -114,13 +142,50 @@ $alerts = $data['alerts'] ?? '';
                         <option value="60" <?php echo $log_days == 60 ? 'selected' : ''; ?>>60</option>
                         <option value="90" <?php echo $log_days == 90 ? 'selected' : ''; ?>>90</option>
                     </select>
-                    <?php esc_html_e('days', 'monitor'); ?>
-                    <button class="button button-secondary" name="clean"><?php esc_html_e('Clean now', 'monitor'); ?></button>
+                    <?php esc_html_e('days', 'satollo-monitor'); ?>
+                    <button class="button button-secondary" name="clean"><?php esc_html_e('Clean now', 'satollo-monitor'); ?></button>
                 </td>
             </tr>
 
+            <tr>
+                <th>
+                    <?php esc_html_e('MCP', 'satollo-monitor'); ?>
+                </th>
+                <td>
+                    <input type="checkbox" value="1" name="data[mcp]" <?php echo isset($data['mcp']) ? 'checked' : ''; ?>>
+                    <p class="description">
+                        Set the abilities to be exposed by the defailt MCP server (if present).
+                    </p>
+                </td>
+            </tr>
+
+            <?php if (WP_DEBUG) { ?>
+                <tr>
+                    <th>
+                        <?php esc_html_e('Report', 'satollo-monitor'); ?>
+                    </th>
+                    <td>
+                        <input type="checkbox" value="1" name="data[report]" <?php echo isset($data['report']) ? 'checked' : ''; ?>>
+
+
+                        <p class="description">
+                            Send daily report to <?= esc_html(get_option('admin_email')) ?>.
+                            <?php
+                            if (isset($data['report'])) {
+                                echo 'Next: ', esc_html(wp_date(get_option('date_format') . ' ' . get_option('time_format'), wp_next_scheduled('monitor_report')));
+                            }
+                            ?>
+                        </p>
+                        <button class="button button-secondary" name="report"><?php esc_html_e('Send now', 'satollo-monitor'); ?></button>
+                    </td>
+                </tr>
+
+            <?php } ?>
+
         </table>
-        <button class="button button-primary" name="save"><?php esc_html_e('Save', 'monitor'); ?></button>
+        <button class="button button-primary" name="save"><?php esc_html_e('Save', 'satollo-monitor'); ?></button>
+
+
     </form>
 
     <h3>Debug</h3>
